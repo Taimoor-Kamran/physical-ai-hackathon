@@ -208,3 +208,10 @@ Wait for consent; never auto-create ADRs. Group related decisions (stacks, authe
 
 ## Code Standards
 See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
+
+## Active Technologies
+- Python 3.11+, JavaScript/TypeScript (for Docusaurus) + Docusaurus, OpenAI Agents SDK / ChatKit, FastAPI, Neon Postgres, Qdrant Cloud Free Tier, GitHub Actions (001-book-creation)
+- Neon Postgres (for RAG chatbot data), Qdrant Cloud Free Tier (for RAG index) (001-book-creation)
+
+## Recent Changes
+- 001-book-creation: Added Python 3.11+, JavaScript/TypeScript (for Docusaurus) + Docusaurus, OpenAI Agents SDK / ChatKit, FastAPI, Neon Postgres, Qdrant Cloud Free Tier, GitHub Actions

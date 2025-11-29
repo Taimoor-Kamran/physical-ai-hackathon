@@ -1,0 +1,69 @@
+openapi: 3.0.0
+info:
+  title: RAG Chatbot API
+  version: 1.0.0
+  description: API for the interactive RAG chatbot embedded within the Physical AI & Humanoid Robotics book.
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
+paths:
+  /query:
+    post:
+      summary: Submit a selected-text query to the RAG chatbot
+      operationId: submitRAGQuery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                selected_text:
+                  type: string
+                  description: The text selected by the user from the book content.
+                  example: "ROS 2 is the second generation of the Robot Operating System."
+                query:
+                  type: string
+                  description: (Optional) The user's specific question related to the selected text.
+                  example: "What is it used for?"
+      responses:
+        '200':
+          description: Successful response with the chatbot's answer.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  answer:
+                    type: string
+                    description: The answer provided by the RAG chatbot based on the selected text and query.
+                    example: "ROS 2 is primarily used for building robotics applications, providing tools and libraries for distributed communication."
+                  source_context:
+                    type: array
+                    items:
+                      type: string
+                    description: (Optional) References to the source content used to generate the answer.
+                    example:
+                      - "Chapter 2: ROS 2 Deep Dive, Section 3.2: Core Concepts"
+        '400':
+          description: Bad Request - e.g., selected_text is missing or too short.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "Selected text is too short or missing."
+        '500':
+          description: Internal Server Error - e.g., RAG index unavailable, processing error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "RAG service temporarily unavailable."
