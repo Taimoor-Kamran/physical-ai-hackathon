@@ -29,13 +29,13 @@ description: "Task list template for feature implementation"
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create root project directories: `backend/` and `frontend/` (root)
-- [ ] T002 Initialize Python environment and dependencies for backend in `backend/` (root)
-- [ ] T003 Initialize Node.js environment and dependencies for frontend in `frontend/` (root)
-- [ ] T004 Create initial FastAPI application structure in `backend/src/api/` (backend/src/api)
-- [ ] T005 Create initial Docusaurus site structure in `frontend/src/` (frontend/src)
-- [ ] T006 Add `requirements.txt` to backend with core FastAPI, uvicorn, qdrant-client, psycopg2-binary, openai (backend/requirements.txt)
-- [ ] T007 Add `package.json` to frontend with Docusaurus, react, react-dom (frontend/package.json)
+- [X] T001 Create root project directories: `backend/` and `frontend/` (root)
+- [X] T002 Initialize Python environment and dependencies for backend in `backend/` (root)
+- [X] T003 Initialize Node.js environment and dependencies for frontend in `frontend/` (root)
+- [X] T004 Create initial FastAPI application structure in `backend/src/api/` (backend/src/api)
+- [X] T005 Create initial Docusaurus site structure in `frontend/src/` (frontend/src)
+- [X] T006 Add `requirements.txt` to backend with core FastAPI, uvicorn, qdrant-client, psycopg2-binary, openai (backend/requirements.txt)
+- [X] T007 Add `package.json` to frontend with Docusaurus, react, react-dom (frontend/package.json)
 
 ---
 
@@ -45,8 +45,8 @@ description: "Task list template for feature implementation"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T008 [P] Configure shared `Makefile` or `justfile` for common commands (build, test, run) (root)
-- [ ] T009 [P] Implement basic logging configuration for backend application in `backend/src/utils/logging.py` (backend/src/utils/logging.py)
+- [X] T008 [P] Configure shared `Makefile` or `justfile` for common commands (build, test, run) (root)
+- [X] T009 [P] Implement basic logging configuration for backend application in `backend/src/utils/logging.py` (backend/src/utils/logging.py)
 - [ ] T010 [P] Configure `.env` handling for environment variables in `backend/.env.example` and `frontend/.env.example` (backend/.env.example, frontend/.env.example)
 - [ ] T011 [P] Setup Git ignore files for `backend/` and `frontend/` (backend/.gitignore, frontend/.gitignore)
 

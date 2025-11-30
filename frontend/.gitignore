@@ -3,6 +3,13 @@ node_modules/
 dist/
 build/
 *.log
-.env
+.env*
 .docusaurus/
 .cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+report.[0-9]*.json
+.pnp/
+.pnp.js

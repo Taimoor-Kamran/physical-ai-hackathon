@@ -11,4 +11,6 @@ htmlcov/
 .mypy_cache/
 .ipynb_checkpoints/
 *.log
-.env
+.env*
+dist/
+*.egg-info/
