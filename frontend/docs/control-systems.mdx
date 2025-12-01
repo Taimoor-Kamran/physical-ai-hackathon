@@ -1,3 +1,130 @@
 ---
 title: "Control Systems"
+sidebar_label: "Control Systems"
 ---
+
+# Control Systems
+
+## Theory
+Control systems are fundamental to robotics, enabling robots to perform tasks autonomously, precisely, and safely. A control system is a device or set of devices that manages, commands, directs, or regulates the behavior of other devices or systems. In robotics, control systems are responsible for taking high-level commands (e.g., "move to x, y, z") and translating them into low-level actions (e.g., joint torques or velocities) to achieve the desired motion while accounting for disturbances and uncertainties.
+
+Key components of a robot control system include:
+-   **Sensors:** To measure the robot's current state (e.g., joint positions, velocities, forces, external environment).
+-   **Controller:** The "brain" that processes sensor feedback, compares it to desired states (setpoints), and generates control signals.
+-   **Actuators:** Devices that convert control signals into physical motion (e.g., motors, hydraulics).
+-   **Feedback Loop:** The continuous process of measuring, comparing, and actuating to correct errors.
+
+Common types of control strategies in robotics include:
+-   **Open-Loop Control:** Control action is independent of the output. Simple but highly sensitive to disturbances and model inaccuracies.
+-   **Closed-Loop (Feedback) Control:** Control action depends on the output. More robust and accurate, as it actively corrects errors. PID (Proportional-Integral-Derivative) controllers are a classic example.
+-   **Advanced Control:** Includes adaptive control, robust control, optimal control, and learning-based control, which are designed to handle complex dynamics, uncertainties, and improve performance over time.
+
+## Code
+```python
+# Example: Simple PID Controller for a 1-DOF Joint Position Control
+import numpy as np
+import matplotlib.pyplot as plt
+
+# --- System Parameters ---
+# Robot joint model: simple mass-damper system (approximates a motor-driven joint)
+m_joint = 0.5  # equivalent mass of the joint (kg)
+b_joint = 0.8  # damping coefficient of the joint (Nms/rad)
+
+# --- PID Controller Gains ---
+Kp = 20.0 # Proportional gain
+Ki = 5.0  # Integral gain
+Kd = 3.0  # Derivative gain
+
+# --- Simulation Parameters ---
+dt = 0.01  # time step (s)
+t_final = 10.0 # final simulation time (s)
+t_points = int(t_final / dt)
+
+# --- Initial Conditions ---
+position = 0.0      # initial joint position (radians)
+velocity = 0.0      # initial joint velocity (rad/s)
+integral_error = 0.0 # initial integral error
+previous_error = 0.0 # initial previous error for derivative term
+
+# --- Desired State (Setpoint) ---
+desired_position = np.deg2rad(90) # Target joint position: 90 degrees
+
+# --- Data Storage for Plotting ---
+time_history = np.arange(0, t_final, dt)
+position_history = []
+desired_position_history = []
+control_effort_history = []
+
+# --- Simulation Loop ---
+for t in time_history:
+    position_history.append(position)
+    desired_position_history.append(desired_position)
+
+    # Calculate error
+    error = desired_position - position
+
+    # Update integral error
+    integral_error += error * dt
+
+    # Calculate derivative error
+    derivative_error = (error - previous_error) / dt
+    previous_error = error
+
+    # Calculate PID control output (torque)
+    control_torque = Kp * error + Ki * integral_error + Kd * derivative_error
+    control_effort_history.append(control_torque)
+
+    # Simulate joint dynamics (simple mass-damper)
+    # F = ma + bv => Torque = I*alpha + B*omega (simplified to m*a + b*v for 1-DOF rotation)
+    # Assuming Torque = m_joint * acceleration + b_joint * velocity
+    acceleration = (control_torque - b_joint * velocity) / m_joint
+    velocity += acceleration * dt
+    position += velocity * dt
+
+# --- Plotting Results ---
+plt.figure(figsize=(12, 8))
+
+plt.subplot(2, 1, 1)
+plt.plot(time_history, np.rad2deg(position_history), label='Actual Position')
+plt.plot(time_history, np.rad2deg(desired_position_history), '--', label='Desired Position')
+plt.title('Joint Position Control with PID')
+plt.xlabel('Time (s)')
+plt.ylabel('Position (degrees)')
+plt.grid(True)
+plt.legend()
+
+plt.subplot(2, 1, 2)
+plt.plot(time_history, control_effort_history, label='Control Torque')
+plt.title('PID Control Effort')
+plt.xlabel('Time (s)')
+plt.ylabel('Torque (Nm)')
+plt.grid(True)
+plt.legend()
+
+plt.tight_layout()
+plt.show()
+```
+
+## Gazebo Simulation
+In Gazebo, control systems are typically implemented using ROS (Robot Operating System) controllers. You can use standard ROS control packages, such as `ros_control`, to define joint-level position, velocity, or effort controllers. These controllers take desired setpoints (e.g., target joint angles) and, using PID or other control laws, generate commands for the simulated robot's joints. Gazebo's physics engine then executes these commands, providing feedback through joint state sensors.
+
+## Real Robot Mapping
+On real robots, control systems are often hierarchical. A high-level motion planner might generate a trajectory, which a mid-level controller breaks down into joint-level setpoints. A low-level controller (often running on embedded hardware) then executes the PID or other control loop to drive the motors. Real-world challenges include sensor noise, actuator saturation, friction, and latency. Advanced robot controllers often incorporate feedforward terms, adaptive gains, and robust error handling to compensate for these non-ideal conditions.
+
+### Hardware Requirements:
+-   A robotic platform with controllable joints (e.g., a robotic arm, mobile robot)
+-   Joint position encoders for feedback
+-   Motor drivers or servo controllers that accept torque, velocity, or position commands
+-   A real-time control computer or embedded system
+
+## Lab Exercise
+
+#### Objective:
+Implement and tune a PID controller for a simulated single robot joint.
+
+#### Instructions:
+1.  **Run the PID Simulation:** Execute the provided Python code. Observe how the joint moves to the desired 90-degree position. Note the overshoot and settling time.
+2.  **Tune Kp:** Increase `Kp` significantly (e.g., `Kp = 50`). What happens to the response? Does it become faster or oscillate more? Reduce `Kp` (e.g., `Kp = 5`). How does the response change?
+3.  **Tune Kd:** Set `Kp` back to `20`. Increase `Kd` (e.g., `Kd = 10`). How does the derivative term affect overshoot and oscillation? Decrease `Kd` (e.g., `Kd = 1`).
+4.  **Tune Ki:** Set `Kp=20`, `Kd=5`. Introduce a small constant external disturbance (e.g., by adding a small value to the `acceleration` calculation in the loop). Observe if there's a steady-state error. Then, increase `Ki` (e.g., `Ki = 10`). Does the integral term eliminate the steady-state error?
+5.  **Optimal Tuning:** Experiment with different combinations of `Kp`, `Ki`, and `Kd` to achieve a fast response with minimal overshoot and no steady-state error. Document your best set of gains.

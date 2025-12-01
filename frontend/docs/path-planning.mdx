@@ -1,3 +1,173 @@
 ---
 title: "Path Planning"
+sidebar_label: "Path Planning"
 ---
+
+# Path Planning
+
+## Theory
+Path planning is a critical capability for autonomous robots, enabling them to navigate from a starting point to a target destination while avoiding obstacles and optimizing for various criteria, such as shortest distance, least time, or minimum energy consumption. This field relies heavily on algorithms to search through possible paths and identify the most suitable one.
+
+Key components of path planning:
+-   **Map Representation:** The environment is typically represented as an occupancy grid, a graph, or a continuous space. The choice of representation influences the planning algorithm.
+-   **Start and Goal States:** The initial and desired final positions (and sometimes orientations) of the robot.
+-   **Obstacles:** Areas in the environment that the robot cannot traverse.
+-   **Path Constraints:** Limitations on the robot's motion (e.g., maximum velocity, turning radius) or environmental rules (e.g., one-way paths).
+-   **Cost Function:** A metric used to evaluate the quality of a path (e.g., path length, time taken, collision risk).
+
+Common categories of path planning algorithms:
+-   **Graph-based Search Algorithms:** These algorithms work on discrete representations of the environment (graphs). Nodes represent locations, and edges represent traversable paths between them. Examples include:
+    -   **Dijkstra's Algorithm:** Finds the shortest path from a single source node to all other nodes in a graph with non-negative edge weights.
+    -   **A* (A-star) Search Algorithm:** An extension of Dijkstra's that uses a heuristic function to guide its search, making it more efficient for finding paths to a specific goal.
+-   **Sampling-based Algorithms:** These algorithms explore the configuration space by randomly sampling points and connecting them to build a roadmap or tree. They are effective for high-dimensional spaces and complex environments.
+    -   **RRT (Rapidly-exploring Random Tree):** Builds a tree by incrementally extending branches towards randomly sampled points until the goal is reached.
+    -   **PRM (Probabilistic Roadmap):** Constructs a roadmap by connecting randomly sampled valid configurations.
+-   **Potential Field Methods:** Treat the robot as a particle under the influence of attractive forces from the goal and repulsive forces from obstacles. Simple but can get stuck in local minima.
+
+## Code
+```python
+# Example: A* Pathfinding Algorithm on a 2D Grid
+import heapq
+import numpy as np
+
+class Node:
+    def __init__(self, position, parent=None):
+        self.position = position
+        self.parent = parent
+        self.g = 0 # Cost from start to current node
+        self.h = 0 # Heuristic cost from current node to end
+        self.f = 0 # Total cost (g + h)
+
+    def __eq__(self, other):
+        return self.position == other.position
+
+    def __lt__(self, other):
+        return self.f < other.f
+
+def astar_pathfinding(grid, start, end):
+    # Create start and end nodes
+    start_node = Node(start)
+    end_node = Node(end)
+
+    # Initialize open and closed lists
+    open_list = []
+    closed_list = []
+
+    # Add the start node to the open list
+    heapq.heappush(open_list, start_node)
+
+    # Loop until the open list is empty
+    while len(open_list) > 0:
+        # Get the current node (node with the lowest f cost)
+        current_node = heapq.heappop(open_list)
+        closed_list.append(current_node)
+
+        # Check if we have reached the goal
+        if current_node == end_node:
+            path = []
+            current = current_node
+            while current is not None:
+                path.append(current.position)
+                current = current.parent
+            return path[::-1] # Return reversed path
+
+        # Generate children (neighbors)
+        children = []
+        for new_position in [(0, -1), (0, 1), (-1, 0), (1, 0), # 4 directions
+                             (-1, -1), (-1, 1), (1, -1), (1, 1)]: # 8 directions (optional)
+            node_position = (current_node.position[0] + new_position[0],
+                             current_node.position[1] + new_position[1])
+
+            # Make sure within range
+            if node_position[0] > (len(grid) - 1) or node_position[0] < 0 or \
+               node_position[1] > (len(grid[len(grid)-1]) - 1) or node_position[1] < 0:
+                continue
+
+            # Make sure walkable terrain (0 is walkable)
+            if grid[node_position[0]][node_position[1]] != 0:
+                continue
+
+            # Create new node
+            new_node = Node(node_position, current_node)
+            children.append(new_node)
+
+        # Loop through children
+        for child in children:
+            # Child is already in the closed list
+            if child in closed_list:
+                continue
+
+            # Create the f, g, and h values
+            child.g = current_node.g + 1 # Assuming cost of 1 for each step
+            # Heuristic: Manhattan distance (can use Euclidean for 8 directions)
+            child.h = abs(child.position[0] - end_node.position[0]) + abs(child.position[1] - end_node.position[1])
+            child.f = child.g + child.h
+
+            # Child is already in the open list with a lower f cost
+            if any(open_node.position == child.position and open_node.f < child.f for open_node in open_list):
+                continue
+
+            # Add the child to the open list
+            heapq.heappush(open_list, child)
+
+    return None # No path found
+
+
+# Example Grid (0 = walkable, 1 = obstacle)
+grid = np.array([
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+])
+
+start_point = (0, 0)
+end_point = (9, 9)
+
+path = astar_pathfinding(grid, start_point, end_point)
+
+if path:
+    print("Path found:", path)
+    # Visualize the path
+    path_grid = np.copy(grid).astype(float)
+    for r, c in path:
+        path_grid[r, c] = 0.5 # Mark path
+
+    plt.imshow(path_grid, cmap='viridis')
+    plt.colorbar(ticks=[0, 0.5, 1], format=plt.FuncFormatter(lambda val, pos: {0:'Free', 0.5:'Path', 1:'Obstacle'}[val]))
+    plt.title('A* Pathfinding')
+    plt.show()
+else:
+    print("No path found!")
+```
+
+## Gazebo Simulation
+In Gazebo, path planning algorithms can be integrated with ROS navigation stack. The global planner (e.g., A*, Dijkstra, or Navfn) calculates a safe path from the robot's current location to the goal location based on a global costmap (built from sensor data and map information). A local planner (e.g., DWA, TEB) then generates velocity commands to follow this path while performing real-time obstacle avoidance. Gazebo allows for testing these planning algorithms in dynamic environments with various robot models.
+
+## Real Robot Mapping
+On real robots, path planning faces challenges such as dynamic obstacles, sensor noise, actuator limitations, and imperfect localization. The generated path needs to be dynamically adjusted based on real-time sensor feedback. Real-time re-planning is crucial in unstructured or changing environments. Safety is paramount, requiring robust collision detection and avoidance strategies. Integration with low-level motion control ensures that the planned path is executable by the robot's physical hardware.
+
+### Hardware Requirements:
+-   **Mobile Robot Platform:** Capable of executing motion commands.
+-   **Localization System:** Accurate odometry (wheel encoders, IMU) and global localization (e.g., LiDAR-based SLAM, GPS) to know the robot's current pose.
+-   **Perception Sensors:** (e.g., LiDAR, depth camera) to detect obstacles and build/update maps.
+-   **Onboard Computer:** Powerful enough to run path planning algorithms and the navigation stack in real-time.
+
+## Lab Exercise
+
+#### Objective:
+Implement and visualize the A* pathfinding algorithm on a 2D grid with obstacles.
+
+#### Instructions:
+1.  **Setup:** Ensure you have Python and `numpy` installed (`pip install numpy matplotlib`).
+2.  **Run A*:** Execute the provided Python code. Observe the generated grid and the path found by the A* algorithm. The path is marked in a different color.
+3.  **Modify Grid:** Change the `grid` definition to add more obstacles (`1`s) or change their positions. Does the A* algorithm still find a path? What happens if the goal is completely blocked?
+4.  **Change Start/End:** Experiment with different `start_point` and `end_point` coordinates. Ensure they are valid (i.e., within grid boundaries and not on an obstacle).
+5.  **Heuristic Function (Challenge):** The current heuristic is Manhattan distance. Research and implement Euclidean distance as a heuristic. How does changing the heuristic affect the pathfinding performance (e.g., speed, path quality)? Note: Euclidean distance is often better for 8-directional movement.
+6.  **Visualize Search (Challenge):** Modify the code to visualize the nodes explored by the algorithm (e.g., by marking visited nodes in `open_list` and `closed_list` with different colors on the grid) to better understand how A* works.

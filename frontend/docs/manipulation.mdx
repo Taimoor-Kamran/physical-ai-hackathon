@@ -1,3 +1,126 @@
 ---
 title: "Manipulation"
+sidebar_label: "Manipulation"
 ---
+
+# Manipulation
+
+## Theory
+Robotic manipulation is the science and engineering of enabling robots to interact physically with their environment, particularly with objects. This is a complex field that requires robots to perceive objects, plan grasping and manipulation sequences, and execute fine motor control. Effective manipulation is critical for applications ranging from industrial assembly and surgical procedures to domestic assistance and space exploration.
+
+Key aspects of robotic manipulation include:
+-   **Grasping:** The act of securely holding an object. This involves selecting appropriate contact points, applying sufficient force, and ensuring stability against disturbances.
+    -   **Form Closure:** The grasp prevents any infinitesimal motion of the object due to friction or applied forces.
+    -   **Force Closure:** The grasp can resist arbitrary forces and torques applied to the object by applying internal forces.
+-   **Manipulation Primitives:** Basic actions like pushing, pulling, twisting, sliding, and placing objects.
+-   **Dexterous Manipulation:** Using multiple fingers or tools to reorient or move an object within the hand or gripper, often without releasing the primary grasp.
+-   **Task and Motion Planning (TAMP):** Integrating high-level task planning (e.g., "assemble a chair") with low-level motion planning (e.g., "move gripper to this position and grasp leg").
+
+Challenges in manipulation:
+-   **Uncertainty:** Imperfect sensor data, unknown object properties (weight, friction), and environmental variations.
+-   **Contact Modeling:** Accurately predicting and controlling forces during contact between the robot, object, and environment.
+-   **High-Dimensionality:** The large number of degrees of freedom in robot arms and grippers, making planning computationally expensive.
+
+## Code
+```python
+# Example: Simple Kinematic Control for a 2-DOF Planar Arm (reaching a point)
+import numpy as np
+import matplotlib.pyplot as plt
+
+class PlanarArm2DOF:
+    def __init__(self, l1=1.0, l2=1.0):
+        self.l1 = l1 # Length of link 1
+        self.l2 = l2 # Length of link 2
+        self.theta1 = 0.0 # Joint 1 angle (radians)
+        self.theta2 = 0.0 # Joint 2 angle (radians)
+
+    def forward_kinematics(self, theta1, theta2):
+        x = self.l1 * np.cos(theta1) + self.l2 * np.cos(theta1 + theta2)
+        y = self.l1 * np.sin(theta1) + self.l2 * np.sin(theta1 + theta2)
+        return np.array([x, y])
+
+    def inverse_kinematics(self, target_x, target_y):
+        # Geometric solution for a 2-DOF planar arm
+        # Based on Law of Cosines
+        d_squared = target_x**2 + target_y**2
+        d = np.sqrt(d_squared)
+
+        if d > (self.l1 + self.l2) or d < abs(self.l1 - self.l2):
+            print("Target out of reach.")
+            return None, None # Target is unreachable
+
+        # Calculate theta2
+        cos_theta2 = (d_squared - self.l1**2 - self.l2**2) / (2 * self.l1 * self.l2)
+        # Ensure cos_theta2 is within valid range [-1, 1] due to floating point errors
+        cos_theta2 = np.clip(cos_theta2, -1.0, 1.0)
+        theta2 = np.arctan2(np.sqrt(1 - cos_theta2**2), cos_theta2) # Elbow up solution
+        # For elbow down solution: theta2 = np.arctan2(-np.sqrt(1 - cos_theta2**2), cos_theta2)
+
+        # Calculate theta1
+        alpha = np.arctan2(target_y, target_x)
+        beta = np.arctan2(self.l2 * np.sin(theta2), self.l1 + self.l2 * np.cos(theta2))
+        theta1 = alpha - beta
+
+        self.theta1 = theta1
+        self.theta2 = theta2
+        return theta1, theta2
+
+    def plot_arm(self, ax, color='blue'):
+        x0, y0 = 0, 0
+        x1, y1 = self.l1 * np.cos(self.theta1), self.l1 * np.sin(self.theta1)
+        x2, y2 = x1 + self.l2 * np.cos(self.theta1 + self.theta2), y1 + self.l2 * np.sin(self.theta1 + self.theta2)
+
+        ax.plot([x0, x1], [y0, y1], color=color, linewidth=3, marker='o', markersize=5)
+        ax.plot([x1, x2], [y1, y2], color=color, linewidth=3, marker='o', markersize=5)
+        ax.plot(x2, y2, 'o', color='red', markersize=8)
+
+# Example Usage:
+arm = PlanarArm2DOF(l1=1.0, l2=1.0)
+
+target_x, target_y = 1.5, 0.5 # Desired end-effector position
+
+t1, t2 = arm.inverse_kinematics(target_x, target_y)
+
+if t1 is not None and t2 is not None:
+    print(f"Joint angles: theta1={np.rad2deg(t1):.2f} deg, theta2={np.rad2deg(t2):.2f} deg")
+    ee_pos = arm.forward_kinematics(t1, t2)
+    print(f"Achieved end-effector position: (x={ee_pos[0]:.2f}, y={ee_pos[1]:.2f})")
+
+    fig, ax = plt.subplots(figsize=(6, 6))
+    ax.set_xlim(-(arm.l1 + arm.l2) - 0.1, (arm.l1 + arm.l2) + 0.1)
+    ax.set_ylim(-(arm.l1 + arm.l2) - 0.1, (arm.l1 + arm.l2) + 0.1)
+    ax.set_aspect('equal')
+    ax.grid(True)
+    arm.plot_arm(ax)
+    ax.plot(target_x, target_y, 'x', color='green', markersize=10, label='Target')
+    plt.title('2-DOF Planar Arm Inverse Kinematics')
+    plt.legend()
+    plt.show()
+else:
+    print("Could not reach target.")
+```
+
+## Gazebo Simulation
+Manipulator robots in Gazebo are defined using URDF/SDF, which specifies their kinematic and dynamic properties, including joints, links, and end-effectors (grippers). Manipulation tasks often involve using ROS MoveIt! to plan complex motion sequences for robotic arms while avoiding self-collision and environmental obstacles. MoveIt! interfaces with Gazebo to execute these planned trajectories and simulate gripper actions, allowing for safe and efficient development and testing of manipulation strategies.
+
+## Real Robot Mapping
+Real-world robotic manipulation is highly complex due to sensor noise, calibration errors, uncertainties in object properties, and the need for robust contact handling. Force/torque sensors are often used to provide feedback during grasping and interaction. Advanced control strategies, such as impedance control, are employed to achieve compliant behavior. Vision systems (e.g., RGB-D cameras) are crucial for object detection, pose estimation, and guiding the manipulation. Calibration of robot kinematics, cameras, and grippers is essential for precision.
+
+### Hardware Requirements:
+-   **Robotic Manipulator Arm:** With 6 or more Degrees of Freedom (DOF) (e.g., UR5, Franka Emika Panda, KUKA LWR).
+-   **End-Effector:** A gripper (parallel jaw, multi-finger) or a specialized tool.
+-   **Force/Torque Sensor:** At the wrist or base of the manipulator for compliant interaction.
+-   **Vision System:** RGB-D camera (e.g., Intel RealSense, Azure Kinect) for object perception.
+-   **Powerful Workstation/Onboard Computer:** To run inverse kinematics, motion planning, and vision algorithms.
+
+## Lab Exercise
+
+#### Objective:
+Implement and visualize the inverse kinematics for a 2-DOF planar robotic arm to reach a desired target.
+
+#### Instructions:
+1.  **Run Inverse Kinematics:** Execute the provided Python code. Observe how the robotic arm adjusts its joint angles to reach the green 'x' target. The red dot represents the end-effector position.
+2.  **Experiment with Targets:** Change the `target_x` and `target_y` values. Try targets within the arm's reach, at the edge of its workspace, and unreachable targets. What output do you get for unreachable targets?
+3.  **Elbow-Down Solution (Challenge):** The `inverse_kinematics` function currently implements the "elbow-up" solution. Modify it to also compute and plot the "elbow-down" solution (by changing the sign of `np.sqrt(1 - cos_theta2**2)` when calculating `theta2`). Visualize both possible configurations for a reachable target.
+4.  **3-DOF Planar Arm (Challenge):** Extend the `PlanarArm2DOF` class to a `PlanarArm3DOF` with an additional link and joint. Implement forward and inverse kinematics for this 3-DOF arm. Hint: Inverse kinematics for 3-DOF is more complex and might require numerical methods or considering a specific wrist orientation.
+5.  **Visualize Workspace:** Generate a visualization of the robotic arm's entire reachable workspace. This could involve iterating through all possible joint angles (within limits) and plotting the end-effector positions.

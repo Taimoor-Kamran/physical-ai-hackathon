@@ -1,3 +1,104 @@
 ---
 title: "Dynamics"
+sidebar_label: "Dynamics"
 ---
+
+# Dynamics
+
+## Theory
+Dynamics is the branch of mechanics concerned with the study of forces and torques and their effect on motion, as opposed to kinematics, which studies the motion itself without considering its causes. In robotics, dynamics is crucial for understanding how a robot interacts with its environment, calculating the torques required at each joint to achieve desired movements, and predicting the robot's behavior under various loads and external forces.
+
+The dynamic equations of motion for a robot typically involve:
+-   **Mass and Inertia:** The mass distribution of each link and the moments of inertia around their respective axes.
+-   **Gravity:** The effect of gravity on the robot's links.
+-   **Coriolis and Centrifugal Forces:** Forces that arise from the rotational motion of the links.
+-   **Applied Torques/Forces:** The forces or torques exerted by the actuators at the joints.
+
+There are two main formulations for deriving the equations of motion:
+-   **Newton-Euler Formulation:** A recursive method that calculates forces and torques from the base to the end-effector (forward recursion) and then from the end-effector back to the base (backward recursion). It is computationally efficient for real-time control.
+-   **Lagrangian Formulation:** A more abstract, energy-based approach that derives equations of motion from the robot's kinetic and potential energy. It is often preferred for symbolic derivation and provides a more compact set of equations.
+
+Understanding dynamics is essential for advanced robot control, such as force control, impedance control, and trajectory tracking, where precise interaction with the environment is required.
+
+## Code
+```python
+# Example: Simple 1-DOF Robotic Arm Dynamics (Pendulum)
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Parameters
+m = 1.0  # mass of the link (kg)
+l = 1.0  # length of the link (m)
+g = 9.81 # acceleration due to gravity (m/s^2)
+b = 0.1  # damping coefficient (Nms/rad)
+
+# Actuator torque
+# For simplicity, let's assume a constant torque for demonstration
+tau_actuator = 0.0 # Nm (no external motor torque for now)
+
+# Time parameters
+dt = 0.01 # time step (s)
+t_final = 10.0 # final time (s)
+t_points = int(t_final / dt)
+
+# Initial conditions
+theta = np.deg2rad(90) # initial angle (radians, 90 degrees vertical)
+theta_dot = 0.0      # initial angular velocity (rad/s)
+
+# Store results
+theta_history = []
+theta_dot_history = []
+time_history = np.arange(0, t_final, dt)
+
+for _ in range(t_points):
+    theta_history.append(theta)
+    theta_dot_history.append(theta_dot)
+
+    # Equation of motion for a pendulum with damping and external torque:
+    # I * theta_double_dot = -m * g * l * sin(theta) - b * theta_dot + tau_actuator
+    # For a simple pendulum, I = m * l^2
+    # theta_double_dot = (-m * g * l * np.sin(theta) - b * theta_dot + tau_actuator) / (m * l**2)
+
+    theta_double_dot = (-g/l) * np.sin(theta) - (b/(m*l**2)) * theta_dot + (tau_actuator/(m*l**2))
+
+    # Update state using Euler integration
+    theta_dot += theta_double_dot * dt
+    theta += theta_dot * dt
+
+# Convert to degrees for plotting
+theta_history_deg = np.rad2deg(theta_history)
+
+plt.figure(figsize=(10, 6))
+plt.plot(time_history, theta_history_deg)
+plt.title('Pendulum Angle vs. Time')
+plt.xlabel('Time (s)')
+plt.ylabel('Angle (degrees)')
+plt.grid(True)
+plt.show()
+```
+
+## Gazebo Simulation
+To simulate robot dynamics in Gazebo, you would define your robot using URDF (Unified Robot Description Format) or SDF (Simulation Description Format). These files include physical properties like mass, inertia, and joint limits. Gazebo's physics engine (e.g., ODE, PhysX, Bullet) then calculates the dynamic behavior of the robot based on these properties and applied forces/torques. For example, if you command a joint to a certain position, Gazebo's controllers will apply torques to achieve that position, taking into account the robot's dynamics.
+
+## Real Robot Mapping
+Implementing dynamics on a real robot involves advanced control techniques. For example, in a torque-controlled robot, you would use inverse dynamics to calculate the required joint torques based on desired accelerations, velocities, and positions. These calculated torques are then sent to the joint motors. Factors like friction, backlash, and unmodeled dynamics can significantly affect real robot performance, requiring robust control algorithms and often adaptive or learning-based approaches. Sensor feedback (e.g., joint encoders, force/torque sensors) is critical for closing the control loop and compensating for disturbances.
+
+### Hardware Requirements:
+-   A robotic arm with torque control capabilities (e.g., Franka Emika Panda, KUKA iiwa)
+-   Joint position and velocity sensors (encoders)
+-   Optional: Force/torque sensors at the end-effector or joints
+-   Real-time operating system (RTOS) or a real-time kernel for precise control execution
+
+## Lab Exercise
+
+#### Objective:
+Analyze the dynamic behavior of a single-link pendulum and design a simple controller.
+
+#### Instructions:
+1.  **Pendulum Simulation:** Run the provided Python code for the 1-DOF pendulum. Observe how the angle changes over time with initial conditions. Experiment with different initial angles and damping coefficients.
+2.  **Add Actuator Torque:** Modify the Python code to introduce a constant `tau_actuator` (e.g., `tau_actuator = 0.5`). Observe how this changes the pendulum's motion. Can you make it swing up from a downward hanging position?
+3.  **PID Controller (Optional Challenge):** Implement a simple Proportional-Integral-Derivative (PID) controller to drive the pendulum to a desired angle (e.g., `theta_desired = np.deg2rad(0)` for upright or `np.deg2rad(90)` for horizontal). You'll need to calculate the error between `theta_desired` and `theta`, and use PID gains to compute `tau_actuator`.
+    -   `error = theta_desired - theta`
+    -   `error_dot = -theta_dot` (for simple proportional-derivative control)
+    -   `tau_actuator = Kp * error + Kd * error_dot` (add Integral term for full PID if desired)
+4.  **Visualize Control:** Plot the desired angle, actual angle, and applied torque over time to evaluate your controller's performance. Compare the behavior with and without the controller.

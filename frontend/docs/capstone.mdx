@@ -1,3 +1,170 @@
 ---
 title: "Capstone Project"
+sidebar_label: "Capstone Project"
 ---
+
+# Capstone Project: Autonomous Warehouse Robot
+
+## Theory
+The Capstone Project brings together all the concepts and skills learned throughout the book into a comprehensive, real-world robotics application. For this project, we will design, simulate, and partially implement an autonomous warehouse robot. This robot will be capable of navigating a warehouse environment, identifying and picking up specific packages, and delivering them to designated drop-off points. The project emphasizes the integration of perception, localization, path planning, manipulation, and human-robot interaction in a unified system.
+
+Key theoretical concepts integrated in this project:
+-   **Kinematics & Dynamics:** Understanding robot movement and the forces involved in manipulation tasks.
+-   **Control Systems:** Implementing robust controllers for precise robot motion and gripper actions.
+-   **Sensors & Actuators:** Utilizing various sensors (LiDAR, cameras) for environmental perception and actuators (motors, grippers) for physical interaction.
+-   **Perception:** Employing computer vision techniques for object detection (packages, drop-off zones) and scene understanding.
+-   **Localization & Mapping:** Using SLAM algorithms to build a map of the warehouse and accurately track the robot's position within it.
+-   **Path Planning:** Developing algorithms to plan collision-free paths from the robot's current location to target locations (packages, drop-off zones).
+-   **Manipulation:** Designing grasping strategies and executing manipulation sequences to pick and place objects.
+-   **Human-Robot Interaction:** Considering how a human operator might interact with the robot for task assignment, error handling, or supervision.
+-   **ROS 2 & Gazebo/NVIDIA Isaac Sim:** Using these platforms for integrating software components and simulating the robot's behavior in a virtual warehouse environment.
+-   **Vision-Language-Action Models (Optional Extension):** Exploring how advanced VLA models could enable the robot to understand more abstract commands (e.g., "retrieve the blue box near shelf A") or adapt to unforeseen situations.
+
+## Code
+```python
+# Example: High-Level Task Orchestration for a Warehouse Robot
+# This conceptual code demonstrates how different robotic modules (perception, navigation, manipulation)
+# would be called and coordinated within a main robot control loop.
+
+import time
+
+class PerceptionModule:
+    def detect_packages(self, image_data) -> list:
+        print("Perception: Detecting packages...")
+        # In a real system, this would use object detection (e.g., YOLO, Mask R-CNN)
+        # For simulation, return dummy package locations
+        return [{"id": "package_A", "location": (1.0, 2.0)},
+                {"id": "package_B", "location": (3.5, 1.0)}]
+
+    def detect_dropoff_zones(self, image_data) -> list:
+        print("Perception: Detecting drop-off zones...")
+        return [{"id": "zone_1", "location": (5.0, 5.0)}]
+
+class NavigationModule:
+    def __init__(self, current_pose=(0.0, 0.0, 0.0)):
+        self.current_pose = current_pose # (x, y, theta)
+
+    def plan_path(self, start_pose, target_location) -> list:
+        print(f"Navigation: Planning path from {start_pose[:2]} to {target_location}...")
+        # In a real system, this would use A* or RRT for path planning
+        # For simulation, return a simple straight-line path
+        path = [start_pose[:2], target_location]
+        return path
+
+    def execute_path(self, path) -> bool:
+        print(f"Navigation: Executing path: {path}...")
+        for point in path:
+            print(f"  Moving towards {point}")
+            time.sleep(0.5) # Simulate movement time
+            self.current_pose = (point[0], point[1], self.current_pose[2]) # Update current position
+        print("Navigation: Path execution complete.")
+        return True
+
+class ManipulationModule:
+    def pick_package(self, package_id, package_location) -> bool:
+        print(f"Manipulation: Picking up {package_id} at {package_location}...")
+        time.sleep(1.0) # Simulate grasping time
+        print(f"Manipulation: {package_id} picked.")
+        return True
+
+    def place_package(self, package_id, dropoff_location) -> bool:
+        print(f"Manipulation: Placing {package_id} at {dropoff_location}...")
+        time.sleep(1.0) # Simulate placing time
+        print(f"Manipulation: {package_id} placed.")
+        return True
+
+class WarehouseRobot:
+    def __init__(self):
+        self.perception = PerceptionModule()
+        self.navigation = NavigationModule()
+        self.manipulation = ManipulationModule()
+        self.camera_feed = "simulated_image_data" # Placeholder for camera input
+
+    def run_task(self):
+        print("\n--- Warehouse Robot Starting Task ---")
+
+        # 1. Perceive environment
+        packages = self.perception.detect_packages(self.camera_feed)
+        dropoff_zones = self.perception.detect_dropoff_zones(self.camera_feed)
+
+        if not packages:
+            print("No packages detected. Task aborted.")
+            return
+        if not dropoff_zones:
+            print("No drop-off zones detected. Task aborted.")
+            return
+
+        target_package = packages[0] # Pick the first detected package
+        target_dropoff_zone = dropoff_zones[0] # Deliver to the first drop-off zone
+
+        print(f"Identified package: {target_package['id']} at {target_package['location']}")
+        print(f"Identified drop-off zone: {target_dropoff_zone['id']} at {target_dropoff_zone['location']}")
+
+        # 2. Navigate to package
+        path_to_package = self.navigation.plan_path(
+            self.navigation.current_pose, target_package['location']
+        )
+        self.navigation.execute_path(path_to_package)
+
+        # 3. Pick up package
+        self.manipulation.pick_package(target_package['id'], target_package['location'])
+
+        # 4. Navigate to drop-off zone
+        path_to_dropoff = self.navigation.plan_path(
+            self.navigation.current_pose, target_dropoff_zone['location']
+        )
+        self.navigation.execute_path(path_to_dropoff)
+
+        # 5. Place package
+        self.manipulation.place_package(target_package['id'], target_dropoff_zone['location'])
+
+        print("\n--- Warehouse Robot Task Complete! ---")
+
+if __name__ == "__main__":
+    robot = WarehouseRobot()
+    robot.run_task()
+```
+
+## Gazebo Simulation
+The Capstone Project would be extensively developed and tested in a Gazebo simulation environment (or NVIDIA Isaac Sim). A detailed Gazebo world would be created, including warehouse shelves, packages (as custom models), and designated drop-off zones. The warehouse robot itself would be represented by a URDF/SDF model, equipped with simulated LiDAR and camera sensors. ROS 2 would be used to integrate all software components:
+-   **Perception:** ROS 2 nodes for processing simulated camera images (e.g., using OpenCV) to detect packages.
+-   **Localization & Mapping:** ROS 2 navigation stack with `gmapping` or `Cartographer` for SLAM using simulated LiDAR data.
+-   **Path Planning:** ROS 2 global and local planners to generate and execute paths.
+-   **Manipulation:** ROS 2 MoveIt! for planning and executing complex gripper movements.
+-   **Overall Control:** A central ROS 2 orchestrator node (similar to the `WarehouseRobot` class above) to manage the task flow.
+
+Gazebo allows for injecting noise, testing various lighting conditions, and creating dynamic obstacles, which is crucial for building a robust autonomous system.
+
+## Real Robot Mapping
+Deploying the autonomous warehouse robot to a real physical environment presents significant challenges and opportunities. The transition from simulation to reality (Sim2Real) requires careful consideration:
+-   **Sensor Accuracy and Noise:** Real-world sensors have limitations, and their data is often noisy. Algorithms must be robust to these imperfections.
+-   **Actuator Precision:** Physical motors and grippers have backlash, friction, and limited precision, which can affect manipulation success.
+-   **Environmental Variability:** Real warehouses are dynamic, with varying lighting, human activity, and package conditions (e.g., damaged boxes, different textures).
+-   **Safety:** Implementing fail-safe mechanisms, collision avoidance with dynamic obstacles (humans, other robots), and emergency stops is paramount.
+-   **Calibration:** Meticulous calibration of all sensors, robot kinematics, and external coordinate frames is essential for accurate operation.
+-   **Computational Resources:** Real-time performance on onboard compute hardware, often requiring optimized code and specialized hardware (e.g., GPUs).
+
+Successful deployment would involve incremental testing, robust error recovery, and potentially human-in-the-loop supervision.
+
+### Hardware Requirements:
+-   **Mobile Base Platform:** A robust mobile robot base (e.g., AMR) with differential or omnidirectional drive.
+-   **Robotic Manipulator Arm:** A 6-DOF or 7-DOF arm for manipulation tasks (e.g., UR5, Franka Emika Panda).
+-   **End-Effector:** A versatile gripper (e.g., parallel-jaw, vacuum) suitable for handling various package types.
+-   **LiDAR Sensor:** For 2D or 3D mapping and navigation.
+-   **RGB-D Camera:** For object detection, pose estimation, and visual feedback during manipulation.
+-   **IMU:** For enhanced localization and odometry.
+-   **Onboard Industrial PC/NVIDIA Jetson:** Powerful compute capable of running ROS 2, deep learning models, and navigation stack in real-time.
+-   **Safety Laser Scanners/Bump Sensors:** For human and obstacle detection and collision avoidance.
+-   **Emergency Stop Button:** For immediate robot shutdown.
+
+## Lab Exercise
+
+#### Objective:
+Understand the high-level orchestration of an autonomous warehouse robot by simulating its core task flow.
+
+#### Instructions:
+1.  **Conceptual Code Review:** Examine the provided Python code for `PerceptionModule`, `NavigationModule`, `ManipulationModule`, and `WarehouseRobot`. Understand how each module contributes to the overall task of picking and placing a package.
+2.  **Run the Simulation:** Execute the `WarehouseRobot` code. Observe the sequence of operations (detection, navigation, pick, navigate, place) as printed to the console.
+3.  **Add More Packages/Zones:** Modify the `PerceptionModule.detect_packages` and `detect_dropoff_zones` methods to return more items. How would you modify the `WarehouseRobot.run_task` to iterate through multiple packages or choose the closest one?
+4.  **Simulate Failures (Challenge):** Introduce a simulated failure at different stages (e.g., `NavigationModule.execute_path` returns `False` due to an obstacle, or `ManipulationModule.pick_package` fails). How would you add error handling to the `WarehouseRobot.run_task` method to recover or report the failure?
+5.  **Integrate with Previous Labs (Challenge):** Conceptually describe how you would replace the dummy functions in `PerceptionModule`, `NavigationModule`, and `ManipulationModule` with the actual code/algorithms you developed in previous lab exercises (e.g., A* for path planning, Canny edge detection for object recognition, inverse kinematics for grasping). Which parts would be challenging to integrate?

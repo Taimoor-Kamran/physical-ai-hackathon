@@ -1,3 +1,109 @@
 ---
 title: "Human-Robot Interaction"
+sidebar_label: "Human-Robot Interaction"
 ---
+
+# Human-Robot Interaction
+
+## Theory
+Human-Robot Interaction (HRI) is a multidisciplinary field concerned with the design, implementation, and evaluation of interfaces and interactions between humans and robots. As robots become more ubiquitous in our daily lives, from industrial settings to homes and public spaces, effective HRI is crucial for ensuring safety, usability, efficiency, and user acceptance. The goal is to enable seamless and intuitive collaboration or coexistence between humans and robots.
+
+Key aspects of HRI include:
+-   **Communication:** How humans and robots exchange information.
+    -   **Verbal Communication:** Speech recognition and synthesis, natural language understanding.
+    -   **Non-Verbal Communication:** Gestures, facial expressions, body language, robot movements, gaze.
+    -   **Haptic Communication:** Touch-based feedback, force feedback (e.g., in teleoperation).
+    -   **Visual Displays:** Screens, LEDs on the robot to convey information or state.
+-   **Collaboration Paradigms:** Different ways humans and robots work together.
+    -   **Co-existence:** Robots and humans share a workspace but operate independently.
+    -   **Cooperation:** Robots and humans work together on a common task, often with shared goals but separate subtasks.
+    -   **Collaboration:** Deep integration where robots and humans work interactively, adapting to each other's actions and intentions.
+-   **Safety:** Designing robots and interactions to prevent harm to humans. This includes physical safety (e.g., collision avoidance, safe stopping mechanisms) and psychological safety (e.g., predictability, trust).
+-   **Trust and Acceptance:** How humans perceive and trust robots. Factors include reliability, transparency, predictability, and social cues.
+-   **Ethics and Social Implications:** Addressing the broader societal impact of robots, including privacy, job displacement, accountability, and the nature of human relationships with robotic agents.
+
+## Code
+```python
+# Example: Simple Gesture Recognition (simulated) for Robot Command
+import time
+
+class GestureSensor:
+    def __init__(self):
+        self.current_gesture = "none"
+
+    def detect_gesture(self):
+        # Simulate gesture detection from an external sensor
+        # In a real system, this would come from a camera/depth sensor and CV algorithm
+        gestures = ["none", "wave", "point_left", "point_right", "stop"]
+        # Simulate random gesture changes for demonstration
+        if np.random.rand() < 0.1: # 10% chance to change gesture
+            self.current_gesture = np.random.choice(gestures)
+        return self.current_gesture
+
+class RobotController:
+    def __init__(self, robot_id):
+        self.robot_id = robot_id
+        self.status = "idle"
+        self.current_command = "none"
+
+    def execute_command(self, gesture):
+        if gesture == "wave":
+            self.current_command = "greet"
+            self.status = "executing: greeting"
+        elif gesture == "point_left":
+            self.current_command = "move_left"
+            self.status = "executing: moving left"
+        elif gesture == "point_right":
+            self.current_command = "move_right"
+            self.status = "executing: moving right"
+        elif gesture == "stop":
+            self.current_command = "stop"
+            self.status = "executing: stopping"
+        else:
+            self.current_command = "none"
+            self.status = "idle"
+
+        print(f"Robot {self.robot_id} -> Gesture: {gesture}, Command: {self.current_command}, Status: {self.status}")
+
+# Example Usage:
+import numpy as np
+
+gesture_sensor = GestureSensor()
+robot = RobotController(robot_id=42)
+
+print("Simulating Human-Robot Interaction with gestures...")
+print("Possible gestures: wave, point_left, point_right, stop")
+
+for i in range(20):
+    detected_gesture = gesture_sensor.detect_gesture()
+    robot.execute_command(detected_gesture)
+    time.sleep(0.5) # Simulate real-time interaction
+
+print("\nSimulation finished.")
+```
+
+## Gazebo Simulation
+Gazebo is an excellent platform for simulating HRI scenarios. You can model human-like figures or simple human proxies (e.g., cylinders) and program their movements. Robots can then use their simulated sensors (cameras, LiDAR) to perceive these humans and react accordingly. ROS packages like `move_base` can be configured for human-aware navigation, and specialized HRI packages can be used to simulate joint attention, gesture recognition, or speech interaction, allowing for safe and ethical HRI development.
+
+## Real Robot Mapping
+Real-world HRI is incredibly challenging. Robots need to interpret complex human cues, which can be ambiguous or vary greatly between individuals. Safety is paramount, requiring advanced perception for human detection and tracking, robust collision avoidance systems, and transparent communication of robot intent. Ethical considerations, such as user privacy, data security, and the potential for over-reliance or psychological manipulation, must be carefully addressed. Field testing with real users is indispensable for validating HRI designs.
+
+### Hardware Requirements:
+-   **Collaborative Robot Arm:** (e.g., Universal Robots, Franka Emika Panda) designed for safe interaction with humans.
+-   **RGB-D Camera:** (e.g., Intel RealSense, Azure Kinect) for human detection, pose estimation, and gesture recognition.
+-   **Microphone Array & Speaker:** For speech interaction (natural language understanding and speech synthesis).
+-   **Force/Torque Sensors:** For physical interaction detection and compliant control.
+-   **Tactile Sensors:** On the robot's body for touch detection.
+-   **Onboard Computer:** Powerful enough to run real-time perception, communication, and control algorithms.
+
+## Lab Exercise
+
+#### Objective:
+Simulate a robot responding to simple human gestures.
+
+#### Instructions:
+1.  **Run the Simulation:** Execute the provided Python code. Observe how the `RobotController` prints different commands and statuses based on the `GestureSensor`'s simulated detections.
+2.  **Modify Gesture Probability:** Change the probability `0.1` in `GestureSensor.detect_gesture()` to make gesture changes more (`0.3`) or less (`0.05`) frequent. How does this affect the robot's responsiveness?
+3.  **Add New Gestures/Commands:** Expand the `gestures` list in `GestureSensor` and add corresponding `elif` conditions in `RobotController.execute_command()` for new commands (e.g., "follow", "retreat").
+4.  **Implement Confirmation (Challenge):** Modify the `RobotController` to "confirm" a command (e.g., by printing "Confirming: [command]") and wait for a second "yes" or "execute" gesture from the user before fully executing. This simulates a safety mechanism.
+5.  **Simulate Communication Breakdown (Challenge):** Introduce a chance for the `GestureSensor` to output an "unclear" or "misinterpreted" gesture. Modify the `RobotController` to handle this by asking for clarification or performing a default safe action.

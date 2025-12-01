@@ -1,3 +1,136 @@
 ---
 title: "Localization & Mapping"
+sidebar_label: "Localization & Mapping"
 ---
+
+# Localization & Mapping
+
+## Theory
+Localization and mapping are two of the most fundamental problems in robotics, especially for autonomous mobile robots. A robot needs to know where it is (localization) and what its environment looks like (mapping) to navigate effectively. These two problems are often intertwined, leading to the concept of Simultaneous Localization and Mapping (SLAM).
+
+### Localization
+Localization is the process of determining a robot's position and orientation within a given map. This is crucial for path planning and executing tasks accurately. Robots use various sensors and algorithms for localization:
+-   **Odometry:** Using wheel encoders or IMUs (Inertial Measurement Units) to estimate movement relative to a starting point. It's prone to drift over time due to accumulating errors.
+-   **Global Localization:** Determining the robot's position from scratch in a known map, even if it has no prior pose information.
+-   **Kidnapped Robot Problem:** A specific localization challenge where a robot, assuming it knows its location, is suddenly moved to an unknown position in a known map. The robot must re-localize itself.
+
+Common localization algorithms:
+-   **Kalman Filters (KF/EKF/UKF):** State estimation algorithms that fuse sensor data over time to predict and update the robot's pose, accounting for noise and uncertainty.
+-   **Particle Filters (Monte Carlo Localization - MCL):** A set of weighted samples (particles) represent the robot's belief about its position. Particles are propagated based on motion and re-weighted based on sensor observations.
+
+### Mapping
+Mapping is the process of building a representation of the environment. This map can be used for navigation, obstacle avoidance, and task execution.
+
+Types of maps:
+-   **Occupancy Grid Maps:** Represent the environment as a grid where each cell stores the probability of being occupied by an obstacle.
+-   **Feature-based Maps:** Store distinct features (e.g., landmarks, corners) and their locations.
+-   **Topological Maps:** Represent the environment as a graph of locations and the connections between them, abstracting away geometric details.
+
+### Simultaneous Localization and Mapping (SLAM)
+SLAM is the problem of constructing or updating a map of an unknown environment while simultaneously keeping track of an agent's location within it. It's a chicken-and-egg problem: a good map is needed for accurate localization, and accurate localization is needed to build a good map. Modern SLAM systems typically use iterative approaches to refine both the map and the robot's pose simultaneously.
+
+## Code
+```python
+# Example: Simple 2D Odometry for a Differential Drive Robot
+import numpy as np
+import matplotlib.pyplot as plt
+
+class DifferentialDriveRobot:
+    def __init__(self, wheel_radius=0.05, wheel_base=0.2, dt=0.1):
+        self.r = wheel_radius  # Wheel radius (m)
+        self.L = wheel_base    # Distance between wheels (m)
+        self.dt = dt           # Time step (s)
+
+        # Robot state (x, y, theta)
+        self.x = 0.0
+        self.y = 0.0
+        self.theta = 0.0 # radians
+
+    def update_odometry(self, left_wheel_velocity, right_wheel_velocity):
+        # Calculate linear and angular velocity of the robot
+        v_linear = self.r * (right_wheel_velocity + left_wheel_velocity) / 2.0
+        v_angular = self.r * (right_wheel_velocity - left_wheel_velocity) / self.L
+
+        # Update robot pose using differential drive kinematics
+        if abs(v_angular) > 1e-6: # Avoid division by zero for straight motion
+            # Arc motion
+            R = v_linear / v_angular # Radius of curvature
+            icc_x = self.x - R * np.sin(self.theta)
+            icc_y = self.y + R * np.cos(self.theta)
+
+            self.x = icc_x + R * np.sin(self.theta + v_angular * self.dt)
+            self.y = icc_y - R * np.cos(self.theta + v_angular * self.dt)
+            self.theta += v_angular * self.dt
+        else:
+            # Straight motion
+            self.x += v_linear * np.cos(self.theta) * self.dt
+            self.y += v_linear * np.sin(self.theta) * self.dt
+
+        # Normalize theta to be between -pi and pi
+        self.theta = np.arctan2(np.sin(self.theta), np.cos(self.theta))
+
+    def get_pose(self):
+        return self.x, self.y, self.theta
+
+# Example Usage:
+robot = DifferentialDriveRobot()
+
+# Store trajectory for plotting
+trajectory_x = [robot.x]
+trajectory_y = [robot.y]
+
+# Simulate movement
+for i in range(100):
+    # Move straight for a while
+    if i < 50:
+        left_vel = 1.0 # rad/s
+        right_vel = 1.0 # rad/s
+    else:
+        # Turn left
+        left_vel = 0.5
+        right_vel = 1.5
+
+    robot.update_odometry(left_vel, right_vel)
+    x, y, theta = robot.get_pose()
+    trajectory_x.append(x)
+    trajectory_y.append(y)
+
+    # print(f"Step {i}: x={x:.2f}, y={y:.2f}, theta={np.rad2deg(theta):.2f}")
+
+plt.figure(figsize=(8, 8))
+plt.plot(trajectory_x, trajectory_y, marker='o', markersize=2, label='Robot Trajectory')
+plt.xlabel('X Position (m)')
+plt.ylabel('Y Position (m)')
+plt.title('Simulated 2D Differential Drive Robot Odometry')
+plt.grid(True)
+plt.axis('equal')
+plt.legend()
+plt.show()
+```
+
+## Gazebo Simulation
+Gazebo provides extensive capabilities for simulating localization and mapping. Robots equipped with simulated sensors (e.g., LiDAR, cameras, IMUs) can generate realistic data streams. These data streams can then be fed into ROS packages for SLAM (e.g., `gmapping`, `Cartographer`, `Hector SLAM`) or odometry estimation (e.g., `robot_localization` using EKFs/UKFs). Developers can test different SLAM configurations, sensor placements, and algorithm parameters in a reproducible virtual environment.
+
+## Real Robot Mapping
+On real robots, achieving accurate and robust localization and mapping is challenging due to sensor noise, dynamic environments, computational constraints, and the need for real-time performance. Effective SLAM systems often fuse data from multiple sensors (e.g., LiDAR, cameras, IMU, GPS). Post-processing techniques like loop closure detection (recognizing previously visited locations) are crucial for correcting drift and building globally consistent maps. The choice of SLAM algorithm depends on the robot's capabilities, sensor suite, and the characteristics of the operating environment.
+
+### Hardware Requirements:
+-   **Mobile Robot Platform:** With differential drive or omnidirectional capabilities.
+-   **LiDAR Sensor:** For creating 2D or 3D occupancy maps and robust localization.
+-   **IMU (Inertial Measurement Unit):** For odometry, attitude estimation, and motion tracking.
+-   **Wheel Encoders:** For basic odometry measurement.
+-   **Powerful Onboard Computer:** To run SLAM algorithms and process sensor data in real-time.
+-   **Optional:** Depth Camera (e.g., Intel RealSense) for visual SLAM or dense mapping.
+-   **Optional:** GPS (for outdoor environments) for global position estimates.
+
+## Lab Exercise
+
+#### Objective:
+Simulate a differential drive robot and visualize its odometry-based trajectory.
+
+#### Instructions:
+1.  **Run the Odometry Simulation:** Execute the provided Python code for the `DifferentialDriveRobot`. Observe the plotted trajectory of the robot.
+2.  **Experiment with Motion:** Modify the `left_vel` and `right_vel` values in the simulation loop. Make the robot move in a circle, a figure-eight, or a zigzag pattern. How do changes in wheel velocities affect the robot's path and orientation?
+3.  **Introduce Noise/Error (Challenge):** Simulate odometry drift by adding a small, cumulative error to the `left_wheel_velocity` or `right_wheel_velocity` at each time step. Observe how this error accumulates and affects the accuracy of the robot's estimated pose over a long trajectory.
+4.  **Visualize Pose:** In addition to the trajectory, try to plot small arrows or markers on the robot's path to indicate its orientation (`theta`) at different points in time. This will help visualize the full pose.
+5.  **Research SLAM Concepts:** Briefly research how a Kalman Filter or Particle Filter could be used to improve the localization accuracy of this robot by incorporating external sensor data (e.g., simulated landmark observations or GPS).

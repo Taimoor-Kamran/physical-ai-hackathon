@@ -1,3 +1,151 @@
 ---
 title: "Sensors & Actuators"
+sidebar_label: "Sensors & Actuators"
 ---
+
+# Sensors & Actuators
+
+## Theory
+Sensors and actuators are the eyes, ears, and muscles of a robot, enabling it to perceive its environment and execute physical actions. Without them, robots would be incapable of interacting with the world. A deep understanding of their principles, characteristics, and limitations is crucial for designing and implementing effective robotic systems.
+
+### Sensors
+Sensors are devices that detect and respond to physical input from the environment. They convert physical quantities (like light, temperature, distance, force) into electrical signals that can be processed by a robot's control system.
+
+Common types of sensors in robotics:
+-   **Proprioceptive Sensors:** Measure the robot's internal state (e.g., joint encoders for position/velocity, IMUs for orientation/acceleration, force/torque sensors at joints).
+-   **Exteroceptive Sensors:** Measure information about the external environment (e.g., cameras for vision, LiDAR/radar for distance and mapping, ultrasonic sensors for proximity, microphones for sound).
+
+Key sensor characteristics:
+-   **Range:** The minimum and maximum values the sensor can measure.
+-   **Resolution:** The smallest change the sensor can detect.
+-   **Accuracy:** How close the measurement is to the true value.
+-   **Precision:** How repeatable the measurements are.
+-   **Response Time:** How quickly the sensor reacts to changes.
+
+### Actuators
+Actuators are components responsible for moving or controlling a mechanism or system. They take a control signal (often electrical) and convert it into a physical motion (e.g., linear or rotary).
+
+Common types of actuators in robotics:
+-   **Electric Motors:** By far the most common, including DC motors, stepper motors, and servo motors. They are clean, efficient, and controllable.
+-   **Hydraulic Actuators:** Use incompressible fluid under pressure. Provide high force/torque density but are bulky and require fluid management.
+-   **Pneumatic Actuators:** Use compressed air. Fast, powerful, and relatively simple, but difficult to achieve precise control.
+-   **Other Actuators:** Such as shape memory alloys, piezoelectric actuators, and muscle-like actuators for specialized applications.
+
+Key actuator characteristics:
+-   **Torque/Force Output:** The maximum rotational or linear force it can generate.
+-   **Speed:** The maximum angular or linear velocity.
+-   **Power:** The rate at which work can be done.
+-   **Efficiency:** How much input energy is converted into useful mechanical work.
+-   **Response Time:** How quickly the actuator can respond to a command.
+
+## Code
+```python
+# Example: Interfacing with a simulated motor and reading a simulated encoder
+import time
+
+class SimulatedMotor:
+    def __init__(self, motor_id, max_torque=5.0, inertia=0.1, damping=0.5):
+        self.motor_id = motor_id
+        self.current_angle = 0.0 # radians
+        self.angular_velocity = 0.0 # rad/s
+        self.max_torque = max_torque
+        self.inertia = inertia # Simplified rotational inertia
+        self.damping = damping # Friction/damping coefficient
+        self.dt = 0.01 # Simulation time step
+
+    def set_torque(self, desired_torque):
+        # Apply limits
+        actual_torque = max(-self.max_torque, min(self.max_torque, desired_torque))
+
+        # Simulate dynamics: Torque = I*alpha + B*omega
+        # alpha = (Torque - B*omega) / I
+        angular_acceleration = (actual_torque - self.damping * self.angular_velocity) / self.inertia
+        self.angular_velocity += angular_acceleration * self.dt
+        self.current_angle += self.angular_velocity * self.dt
+
+    def get_angle(self):
+        return self.current_angle
+
+class SimulatedEncoder:
+    def __init__(self, motor_instance, noise_std_dev=0.01):
+        self.motor = motor_instance
+        self.noise_std_dev = noise_std_dev
+
+    def get_reading(self):
+        # Add some sensor noise to the true motor angle
+        noise = np.random.normal(0, self.noise_std_dev)
+        return self.motor.get_angle() + noise
+
+# Example Usage:
+import numpy as np
+
+motor = SimulatedMotor(motor_id=1, max_torque=10.0)
+encoder = SimulatedEncoder(motor)
+
+desired_angle = np.deg2rad(90) # Target 90 degrees
+Kp = 10.0 # Proportional gain
+
+print(f"Initial Motor Angle: {np.rad2deg(motor.get_angle()):.2f} degrees")
+print(f"Initial Encoder Reading: {np.rad2deg(encoder.get_reading()):.2f} degrees")
+
+angle_history = []
+encoder_history = []
+time_history = []
+
+for i in range(200):
+    current_time = i * motor.dt
+    error = desired_angle - encoder.get_reading() # Use encoder feedback
+    control_torque = Kp * error # Simple P-controller
+
+    motor.set_torque(control_torque)
+
+    angle_history.append(np.rad2deg(motor.get_angle()))
+    encoder_history.append(np.rad2deg(encoder.get_reading()))
+    time_history.append(current_time)
+
+    # print(f"Time: {current_time:.2f}s, Motor: {np.rad2deg(motor.get_angle()):.2f} deg, Encoder: {np.rad2deg(encoder.get_reading()):.2f} deg, Torque: {control_torque:.2f} Nm")
+
+import matplotlib.pyplot as plt
+plt.figure(figsize=(10, 6))
+plt.plot(time_history, angle_history, label='Actual Motor Angle')
+plt.plot(time_history, encoder_history, label='Encoder Reading (with noise)', linestyle='--')
+plt.axhline(y=np.rad2deg(desired_angle), color='r', linestyle=':', label='Desired Angle')
+plt.xlabel('Time (s)')
+plt.ylabel('Angle (degrees)')
+plt.title('Simulated Motor Control with Encoder Feedback')
+plt.legend()
+plt.grid(True)
+plt.show()
+```
+
+## Gazebo Simulation
+In Gazebo, sensors are typically added to the URDF/SDF model of a robot (e.g., `<sensor>` tags). Gazebo then simulates the physical properties of these sensors (e.g., camera intrinsic/extrinsic parameters, LiDAR scan patterns, IMU noise). Actuators are usually represented by joint controllers within ROS control, which command the simulated motors to apply forces or torques based on control signals. Gazebo's plugin architecture allows for custom sensor and actuator models to be integrated.
+
+## Real Robot Mapping
+On real robots, connecting sensors and actuators involves both hardware interfacing and software drivers. Sensors transmit data via various protocols (e.g., SPI, I2C, CAN, Ethernet) to the robot's control computer. Actuators receive commands, often as PWM signals for motors or digital commands for smart servos, and execute physical motion. Calibration is critical for both: sensors need to be calibrated for accuracy, and actuators need to be tuned for performance and safety. Robust wiring, power management, and electromagnetic compatibility are also crucial real-world considerations.
+
+### Hardware Requirements:
+-   **Sensors:**
+    -   Rotary Encoders (e.g., optical encoders on motor shafts)
+    -   IMU (Inertial Measurement Unit) - Accelerometer, Gyroscope
+    -   Camera (e.g., USB camera, Depth camera like RealSense/Kinect)
+    -   Lidar (e.g., RPLiDAR, Velodyne)
+-   **Actuators:**
+    -   DC Servo Motors or Stepper Motors
+    -   Motor Drivers (e.g., H-bridge for DC motors, specialized servo drivers)
+    -   Power Supply
+-   **Control Hardware:**
+    -   Microcontroller (e.g., Arduino, ESP32) for low-level motor control
+    -   Single-board computer (e.g., Raspberry Pi, NVIDIA Jetson) for high-level sensor processing and control logic
+
+## Lab Exercise
+
+#### Objective:
+Simulate a motor with encoder feedback and implement a simple proportional controller to reach a target angle.
+
+#### Instructions:
+1.  **Run the Simulation:** Execute the provided Python code for the `SimulatedMotor` and `SimulatedEncoder`. Observe the actual motor angle and the encoder reading (which includes some noise) as the P-controller tries to reach 90 degrees.
+2.  **Experiment with Noise:** Change the `noise_std_dev` in `SimulatedEncoder` (e.g., `0.05` for more noise, `0.001` for less). How does sensor noise affect the stability and accuracy of the control?
+3.  **Tune Kp:** Modify the `Kp` gain (e.g., `Kp = 5.0` or `Kp = 20.0`). How does the proportional gain affect the speed of response, overshoot, and steady-state error?
+4.  **Add Integral and Derivative Terms (Challenge):** Extend the controller to a full PID controller using the concepts learned in the Control Systems chapter. Implement integral and derivative terms to improve tracking performance and minimize steady-state errors. Compare its performance to the simple P-controller.
+5.  **Visualize Effects:** Use `matplotlib` to plot the `error` and `control_torque` over time. Analyze how these values behave with different controller gains and noise levels.

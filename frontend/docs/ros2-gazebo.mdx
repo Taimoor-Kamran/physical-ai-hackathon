@@ -1,3 +1,148 @@
 ---
 title: "ROS 2 & Gazebo"
+sidebar_label: "ROS 2 & Gazebo"
 ---
+
+# ROS 2 & Gazebo
+
+## Theory
+ROS 2 (Robot Operating System 2) and Gazebo are foundational tools for modern robotics development. ROS 2 provides a flexible framework for writing robot software, offering libraries, tools, and conventions that simplify the creation of complex robot applications. Gazebo is a powerful 3D simulator that accurately simulates robot dynamics, sensors, and environments, allowing developers to test algorithms and robot designs in a safe, repeatable, and cost-effective virtual setting before deploying to real hardware.
+
+Key concepts in ROS 2:
+-   **Nodes:** Executable processes that perform computation (e.g., a sensor driver node, a path planning node).
+-   **Topics:** Named buses over which nodes exchange messages (e.g., `/cmd_vel` for velocity commands, `/odom` for odometry data).
+-   **Services:** Request/reply communication for tasks that require a response (e.g., `set_gripper_state`).
+-   **Actions:** Long-running tasks with feedback and preemption capabilities (e.g., `navigate_to_pose`).
+-   **Parameters:** Configuration values that can be set and retrieved by nodes.
+-   **Packages:** The fundamental unit of ROS 2 software organization, containing nodes, libraries, configuration files, etc.
+-   **Launch Files:** XML or Python files used to start multiple ROS 2 nodes and configure their parameters.
+
+Key aspects of Gazebo:
+-   **Physics Engine:** Simulates rigid body dynamics, contact, and friction.
+-   **Sensors:** Realistic simulation of cameras, LiDAR, IMUs, force sensors, etc.
+-   **Worlds:** XML files defining the environment, including models, lighting, and physics properties.
+-   **Models:** URDF (Unified Robot Description Format) or SDF (Simulation Description Format) files defining robot kinematics, dynamics, and visual appearance.
+-   **Plugins:** Extend Gazebo's functionality, often used to bridge ROS 2 with Gazebo for robot control and sensor data publication.
+
+## Code
+```python
+# Example: Simple ROS 2 Publisher and Subscriber (simulated)
+# This code block is conceptual and demonstrates the ROS 2 API.
+# To run actual ROS 2 code, you would need a ROS 2 environment set up.
+
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import String
+import time
+
+class SimplePublisher(Node):
+    def __init__(self):
+        super().__init__('simple_publisher')
+        self.publisher_ = self.create_publisher(String, 'chatter', 10)
+        timer_period = 0.5  # seconds
+        self.timer = self.create_timer(timer_period, self.timer_callback)
+        self.i = 0
+
+    def timer_callback(self):
+        msg = String()
+        msg.data = f'Hello ROS 2! Count: {self.i}'
+        self.publisher_.publish(msg)
+        self.get_logger().info(f'Publishing: "{msg.data}"')
+        self.i += 1
+
+class SimpleSubscriber(Node):
+    def __init__(self):
+        super().__init__('simple_subscriber')
+        self.subscription = self.create_subscription(
+            String,
+            'chatter',
+            self.listener_callback,
+            10)
+        self.subscription  # prevent unused variable warning
+
+    def listener_callback(self, msg):
+        self.get_logger().info(f'I heard: "{msg.data}"')
+
+def main(args=None):
+    # This is a conceptual representation.
+    # In a real ROS 2 setup, you would typically run publisher and subscriber
+    # nodes in separate processes.
+    print("Simulating ROS 2 nodes. In a real scenario, run with `ros2 run`.")
+
+    # Simulate running nodes
+    publisher_node = SimplePublisher()
+    subscriber_node = SimpleSubscriber()
+
+    # Simple loop to simulate ROS 2 spin for a short duration
+    for _ in range(5):
+        rclpy.spin_once(publisher_node, timeout_sec=0.1)
+        rclpy.spin_once(subscriber_node, timeout_sec=0.1)
+        time.sleep(0.5)
+
+    print("\nSimulation finished.")
+
+    # These lines would be part of a real ROS 2 main function
+    # rclpy.init(args=args)
+    #
+    # publisher_node = SimplePublisher()
+    # subscriber_node = SimpleSubscriber()
+    #
+    # executor = rclpy.executors.MultiThreadedExecutor()
+    # executor.add_node(publisher_node)
+    # executor.add_node(subscriber_node)
+    #
+    # try:
+    #     executor.spin()
+    # except KeyboardInterrupt:
+    #     pass
+    #
+    # publisher_node.destroy_node()
+    # subscriber_node.destroy_node()
+    # rclpy.shutdown()
+
+if __name__ == '__main__':
+    # This will only run the conceptual simulation.
+    # For actual ROS 2, `rclpy.init()` would be needed.
+    # As rclpy is not available in this environment, this is a placeholder.
+    main()
+```
+
+## Gazebo Simulation
+Gazebo is tightly integrated with ROS 2 through various bridge packages (e.g., `ros_gz_sim`). This integration allows Gazebo to publish sensor data to ROS 2 topics and subscribe to ROS 2 topics for robot control commands.
+
+A typical workflow involves:
+1.  **Defining the Robot:** Creating a URDF or SDF file for the robot, including its links, joints, sensors, and actuators.
+2.  **Creating a Gazebo World:** Defining the simulation environment (e.g., a factory floor, an outdoor scene) using an SDF world file.
+3.  **Integrating ROS 2:** Using Gazebo plugins (like `libgazebo_ros_diff_drive` for mobile robots or `libgazebo_ros_joint_state_publisher` for joint states) to enable communication between Gazebo's physics engine and ROS 2 topics.
+4.  **Launching the Simulation:** Using ROS 2 launch files to start Gazebo with the specified robot and world, along with any necessary ROS 2 nodes for control, navigation, or perception.
+
+Gazebo provides realistic physics (gravity, friction, collisions) and high-fidelity sensor models (cameras, LiDAR, IMUs), making it an invaluable tool for developing and testing complex robotic systems in a safe and reproducible virtual environment.
+
+## Real Robot Mapping
+Deploying ROS 2 applications from simulation to a real robot involves addressing several key challenges:
+-   **Hardware Abstraction Layer:** ROS 2 drivers are needed for real sensors and actuators to match the interfaces provided by Gazebo's simulated sensors.
+-   **Sensor Noise and Latency:** Real-world sensor data is inherently noisy and subject to latency, which algorithms developed in perfect simulation must be robust against.
+-   **Actuator Limitations:** Real motors have limitations in torque, speed, and precision that need to be accounted for in control algorithms.
+-   **Calibration:** Accurate calibration of sensors, robot kinematics, and environment models is critical for real-world performance.
+-   **Safety:** Implementing robust safety protocols, including emergency stops and collision avoidance, is paramount for real robots operating in physical environments.
+
+Despite these challenges, ROS 2's modular architecture and strong community support provide a pathway to bridge the gap between simulation and real-world deployment.
+
+### Hardware Requirements:
+-   **Robot Controller:** A robust embedded computer (e.g., NVIDIA Jetson, Raspberry Pi 4, industrial PC) capable of running ROS 2.
+-   **ROS 2 Compatible Sensors:** LiDAR, cameras (RGB, depth), IMUs, force/torque sensors with available ROS 2 drivers.
+-   **ROS 2 Compatible Actuators:** Motors, servos, grippers with control interfaces that can be driven by ROS 2 control nodes.
+-   **Networking:** Reliable Ethernet or Wi-Fi connectivity for inter-robot communication and remote monitoring.
+-   **Power Management:** Sufficient power supply for all robot components.
+
+## Lab Exercise
+
+#### Objective:
+Understand the fundamental concepts of ROS 2 nodes, topics, and message passing.
+
+#### Instructions:
+1.  **Conceptual Code Review:** Carefully review the provided Python code for `SimplePublisher` and `SimpleSubscriber`. Identify where messages are created, published, and received.
+2.  **ROS 2 Environment Setup (External):** If you have access to a machine with ROS 2 (e.g., ROS 2 Humble on Ubuntu), try to run the conceptual publisher and subscriber in a real ROS 2 environment. You would typically save these as `publisher_node.py` and `subscriber_node.py` in a ROS 2 package, make them executable, and then run them with `ros2 run <package_name> publisher_node` and `ros2 run <package_name> subscriber_node` in separate terminals.
+3.  **Modify Message Content:** In the `SimplePublisher` class, change the content of the `msg.data` (e.g., `msg.data = f'Greetings from my robot! Iteration: {self.i}'`). Observe how the subscriber node's output changes.
+4.  **Change Topic Name (Challenge):** Modify both the `SimplePublisher` and `SimpleSubscriber` to use a different topic name (e.g., `'robot_talk'`). What happens if they are not using the same topic name?
+5.  **Introduce a Custom Message Type (Challenge):** Research how to define a custom ROS 2 message (e.g., a message containing a robot's `x, y, z` position). Modify the publisher to send this custom message and the subscriber to receive and process it. This will involve creating a `.msg` file and updating your `package.xml` and `CMakeLists.txt` (in a real ROS 2 package).

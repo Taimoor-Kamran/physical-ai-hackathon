@@ -1,3 +1,95 @@
 ---
 title: "Perception"
+sidebar_label: "Perception"
 ---
+
+# Perception
+
+## Theory
+Perception is a cornerstone of intelligent robotic behavior, enabling robots to interpret sensory data from their environment and build a meaningful representation of the world around them. Without robust perception, robots cannot navigate, interact with objects, or understand human commands. This field integrates various sensor modalities and sophisticated algorithms to extract useful information.
+
+Key aspects of robotic perception include:
+-   **Sensor Data Acquisition:** Collecting raw data from cameras, LiDAR, radar, ultrasonic sensors, etc.
+-   **Feature Extraction:** Identifying salient features from raw sensor data (e.g., edges, corners, color blobs from images; points from LiDAR scans).
+-   **Data Fusion:** Combining information from multiple sensors to create a more comprehensive and robust understanding of the environment, compensating for individual sensor limitations.
+-   **Object Recognition and Tracking:** Identifying specific objects in the environment and continuously monitoring their positions and states.
+-   **Scene Understanding:** Building a high-level semantic interpretation of the environment (e.g., identifying rooms, furniture, open spaces, obstacles).
+
+Common perception tasks and techniques:
+-   **Computer Vision:** Using cameras to process images and videos for tasks like object detection, facial recognition, gesture recognition, and depth estimation. Techniques include classical image processing (e.g., SIFT, SURF) and deep learning (e.g., CNNs for classification, YOLO/Mask R-CNN for detection/segmentation).
+-   **Point Cloud Processing:** Handling data from 3D sensors like LiDAR or depth cameras. Tasks include filtering, segmentation (e.g., RANSAC for plane detection), and registration (e.g., ICP for aligning scans).
+-   **Simultaneous Localization and Mapping (SLAM):** Building a map of an unknown environment while simultaneously tracking the robot's location within that map. This is a critical task for autonomous navigation.
+
+## Code
+```python
+# Example: Simple Edge Detection using OpenCV (Python)
+import cv2
+import numpy as np
+
+def apply_canny_edge_detection(image_path):
+    # Load the image
+    img = cv2.imread(image_path)
+
+    if img is None:
+        print(f"Error: Could not load image from {image_path}")
+        return
+
+    # Convert to grayscale
+    gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Apply Gaussian blur to reduce noise and improve edge detection
+    blurred_img = cv2.GaussianBlur(gray_img, (5, 5), 0)
+
+    # Apply Canny edge detector
+    # arguments: image, threshold1, threshold2 (minVal and maxVal for hysteresis procedure)
+    edges = cv2.Canny(blurred_img, 50, 150)
+
+    # Display the original and edge-detected images
+    cv2.imshow('Original Image', img)
+    cv2.imshow('Canny Edges', edges)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+# To run this code, you need an image file (e.g., 'robot_scene.jpg') in the same directory
+# You can create a dummy image for testing, or download one.
+# Example: Create a dummy image (a simple white square on black background)
+def create_dummy_image(filename='dummy_image.png'):
+    img = np.zeros((300, 300, 3), dtype=np.uint8)
+    cv2.rectangle(img, (50, 50), (250, 250), (255, 255, 255), -1) # White square
+    cv2.imwrite(filename, img)
+    print(f"Dummy image '{filename}' created.")
+
+if __name__ == "__main__":
+    # Create a dummy image for demonstration if not already present
+    dummy_image_path = 'dummy_image.png'
+    # Comment out the line below if you have your own image or don't want to overwrite
+    create_dummy_image(dummy_image_path)
+
+    apply_canny_edge_detection(dummy_image_path)
+
+```
+
+## Gazebo Simulation
+In Gazebo, perception is simulated through virtual sensors. Cameras can generate realistic image streams (RGB, depth, infrared), LiDAR sensors produce point clouds, and IMUs output simulated acceleration and angular velocity data. These simulated sensor feeds can be consumed by robot software (e.g., ROS nodes) just like real sensor data, allowing perception algorithms to be developed and tested in a controlled virtual environment before deployment on a physical robot. Gazebo also allows for injecting noise and errors into sensor data to simulate real-world conditions.
+
+## Real Robot Mapping
+On real robots, perception systems face significant challenges including sensor noise, varying lighting conditions, occlusions, dynamic environments, and computational constraints. Robust perception requires careful sensor selection, calibration, and the use of algorithms that can handle uncertainty. Real-time performance is crucial, often necessitating optimized libraries (e.g., OpenCV, PCL), specialized hardware (e.g., GPUs, FPGAs), and efficient software architectures. The data collected by perception systems directly feeds into localization, mapping, and decision-making modules.
+
+### Hardware Requirements:
+-   **High-Resolution Camera:** For computer vision tasks.
+-   **LiDAR Sensor:** For 3D mapping and obstacle detection (e.g., a 2D or 3D LiDAR).
+-   **Depth Camera:** (e.g., Intel RealSense, Azure Kinect) for 3D object detection and scene understanding.
+-   **Powerful onboard computer:** (e.g., NVIDIA Jetson, Intel NUC) with GPU capabilities for running deep learning models for vision.
+-   **IMU:** For robot localization and odometry.
+
+## Lab Exercise
+
+#### Objective:
+Experiment with Canny edge detection and explore its parameters on a sample image.
+
+#### Instructions:
+1.  **Setup:** Ensure you have OpenCV installed (`pip install opencv-python numpy matplotlib`). Save a sample image (or use the provided `create_dummy_image` function) in the same directory as your Python script.
+2.  **Run Edge Detection:** Execute the provided Python code. Observe the original and edge-detected images. Experiment by changing the `image_path` to your own image.
+3.  **Tune Canny Thresholds:** Modify the `threshold1` and `threshold2` parameters in `cv2.Canny()` (e.g., `(30, 100)`, `(70, 200)`, `(10, 50)`). Observe how these changes affect the detected edges. What do these thresholds represent in the Canny algorithm?
+4.  **Gaussian Blur Effect:** Change the kernel size of `cv2.GaussianBlur()` (e.g., `(3,3)`, `(7,7)`). How does the amount of blur affect the noise in the edges and the sharpness of the detection?
+5.  **Challenge (Object Detection):** Research a simple object detection method (e.g., template matching, color-based segmentation) using OpenCV. Try to detect a specific shape or color in your image. Hint: Look into `cv2.matchTemplate()` or `cv2.inRange()` for color filtering.
