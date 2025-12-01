@@ -47,8 +47,8 @@ description: "Task list template for feature implementation"
 
 - [X] T008 [P] Configure shared `Makefile` or `justfile` for common commands (build, test, run) (root)
 - [X] T009 [P] Implement basic logging configuration for backend application in `backend/src/utils/logging.py` (backend/src/utils/logging.py)
-- [ ] T010 [P] Configure `.env` handling for environment variables in `backend/.env.example` and `frontend/.env.example` (backend/.env.example, frontend/.env.example)
-- [ ] T011 [P] Setup Git ignore files for `backend/` and `frontend/` (backend/.gitignore, frontend/.gitignore)
+- [X] T010 [P] Configure `.env` handling for environment variables in `backend/.env.example` and `frontend/.env.example` (backend/.env.example, frontend/.env.example)
+- [X] T011 [P] Setup Git ignore files for `backend/` and `frontend/` (backend/.gitignore, frontend/.gitignore)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -62,14 +62,14 @@ description: "Task list template for feature implementation"
 
 ### Implementation for User Story 1
 
-- [ ] T012 [US1] Configure Docusaurus `docusaurus.config.js` with site metadata and theme (frontend/docusaurus.config.js)
-- [ ] T013 [US1] Create Docusaurus `sidebars.js` for 13-week curriculum navigation (frontend/sidebars.js)
-- [ ] T014 [US1] Create initial `index.md` or `_index.mdx` for the book's homepage (frontend/src/pages/index.mdx)
+- [X] T012 [US1] Configure Docusaurus `docusaurus.config.js` with site metadata and theme (frontend/docusaurus.config.js)
+- [X] T013 [US1] Create Docusaurus `sidebars.js` for 13-week curriculum navigation (frontend/sidebars.js)
+- [X] T014 [US1] Create initial `index.md` or `_index.mdx` for the book's homepage (frontend/src/pages/index.mdx)
 - [ ] T015 [US1] Create placeholder Markdown/MDX files for all 13 weeks in `frontend/docs/` (frontend/docs/week1.mdx, frontend/docs/week2.mdx, ...)
 - [ ] T016 [P] [US1] Implement a basic Docusaurus component to display content with Theory, Code, Screenshot, Real robot mapping structure (frontend/src/components/ContentBlock.js)
 - [ ] T017 [US1] Update one chapter's content (e.g., `week1.mdx`) to use the new `ContentBlock` component and include a "Lab Exercise" section with hardware requirements (frontend/docs/week1.mdx)
-- [ ] T018 [US1] Configure GitHub Actions for Docusaurus deployment to GitHub Pages (root/.github/workflows/deploy-docs.yml)
-- [ ] T019 [US1] Verify Docusaurus deployment to GitHub Pages works correctly (GitHub Pages URL)
+- [X] T018 [US1] Configure GitHub Actions for Docusaurus deployment to GitHub Pages (root/.github/workflows/deploy-docs.yml)
+- [X] T019 [US1] Verify Docusaurus deployment to GitHub Pages works correctly (GitHub Pages URL)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -83,10 +83,10 @@ description: "Task list template for feature implementation"
 
 ### Implementation for User Story 2
 
-- [ ] T020 [US2] Define FastAPI model for `/query` request (selected_text, query) in `backend/src/api/models.py` (backend/src/api/models.py)
+- [X] T020 [US2] Define FastAPI model for `/query` request (selected_text, query) in `backend/src/api/models.py` (backend/src/api/models.py)
 - [ ] T021 [US2] Define FastAPI model for `/query` response (answer, source_context) in `backend/src/api/models.py` (backend/src/api/models.py)
-- [ ] T022 [P] [US2] Implement Qdrant client initialization and connection in `backend/src/data/qdrant_client.py` (backend/src/data/qdrant_client.py)
-- [ ] T023 [P] [US2] Implement Postgres connection and basic content retrieval in `backend/src/data/postgres_client.py` (backend/src/data/postgres_client.py)
+- [X] T022 [P] [US2] Implement Qdrant client initialization and connection in `backend/src/data/qdrant_client.py` (backend/src/data/qdrant_client.py)
+- [X] T023 [P] [US2] Implement Postgres connection and basic content retrieval in `backend/src/data/postgres_client.py` (backend/src/data/postgres_client.py)
 - [ ] T024 [P] [US2] Implement OpenAI Agents SDK / ChatKit integration for RAG processing in `backend/src/services/rag_service.py` (backend/src/services/rag_service.py)
 - [ ] T025 [US2] Implement `/query` FastAPI endpoint that uses `rag_service` to process selected text (backend/src/api/routes.py)
 - [ ] T026 [P] [US2] Create a Docusaurus client-side component to allow text selection and display chatbot UI (frontend/src/components/RAGChatbot.js)

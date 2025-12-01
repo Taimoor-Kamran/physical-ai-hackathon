@@ -1,0 +1,36 @@
+.defaultBlock {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  line-height: 1.6;
+}
+
+.Theory {
+  background-color: var(--ifm-color-info-background);
+  color: var(--ifm-color-info);
+  border: 1px solid var(--ifm-color-info-dark);
+}
+
+.Code {
+  background-color: var(--ifm-color-primary-background);
+  color: var(--ifm-color-primary);
+  border: 1px solid var(--ifm-color-primary-dark);
+}
+
+.Screenshot {
+  background-color: var(--ifm-color-success-background);
+  color: var(--ifm-color-success);
+  border: 1px solid var(--ifm-color-success-dark);
+}
+
+.Realrobotmapping {
+  background-color: var(--ifm-color-warning-background);
+  color: var(--ifm-color-warning);
+  border: 1px solid var(--ifm-color-warning-dark);
+}
+
+.blockTitle {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}

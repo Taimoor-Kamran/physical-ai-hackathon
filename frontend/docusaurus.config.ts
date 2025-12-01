@@ -8,6 +8,10 @@ const config: Config = {
   title: 'Physical AI & Humanoid Robotics',
   tagline: 'Learn about Physical AI and Humanoid Robotics with hands-on labs',
   favicon: 'img/favicon.ico',
+  url: 'https://taimoor-khan.github.io',
+  baseUrl: '/Hackathon/',
+  organizationName: 'taimoor-khan',
+  projectName: 'Hackathon',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -44,7 +48,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/taimoor-khan/Hackathon/tree/main/frontend/',
+            'https://github.com/taimoor-khan/Hackathon/tree/001-book-creation/frontend/',
         },
         blog: {
           showReadingTime: true,
@@ -55,7 +59,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/taimoor-khan/Hackathon/tree/main/frontend/',
+            'https://github.com/taimoor-khan/Hackathon/tree/001-book-creation/frontend/',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
