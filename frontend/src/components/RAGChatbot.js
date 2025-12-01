@@ -44,7 +44,7 @@ const RAGChatbot = () => {
     setSourceContext([]);
 
     try {
-      const response = await fetch('http://localhost:8000/rag/query', {
+      const response = await fetch('http://localhost:8000/query', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

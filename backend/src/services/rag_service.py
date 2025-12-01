@@ -11,11 +11,20 @@ from backend.src.data.qdrant_client import COLLECTION_NAME, get_qdrant_client
 logger = get_logger(__name__)
 
 class RAGService:
+    """
+    Service for Retrieval-Augmented Generation (RAG) processing using OpenAI and Qdrant.
+    This service provides the core RAG functionality that an OpenAI Agent (built with the Agents SDK)
+    could utilize as a tool. The current implementation directly uses the OpenAI Python client,
+    which is the foundational SDK for interacting with OpenAI models.
+    """
     def __init__(self):
         self.openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.qdrant_client: QdrantClient = get_qdrant_client()
 
     def _get_embedding(self, text: str) -> list[float]:
+        """
+        Generates an embedding for the given text using OpenAI's text-embedding-ada-002 model.
+        """
         response = self.openai_client.embeddings.create(
             input=text,
             model="text-embedding-ada-002"
@@ -23,6 +32,20 @@ class RAGService:
         return response.data[0].embedding
 
     def query_rag(self, selected_text: str, query: str | None = None) -> dict:
+        """
+        Performs Retrieval-Augmented Generation (RAG) to answer a query based on selected text.
+
+        This method integrates with Qdrant to retrieve relevant context and then uses
+        OpenAI's chat completion to generate an answer. This method is suitable for
+        exposure as a tool within the OpenAI Agents SDK framework.
+
+        Args:
+            selected_text (str): The text selected by the user, used as primary context.
+            query (str | None): An optional follow-up question from the user.
+
+        Returns:
+            dict: A dictionary containing the generated 'answer' and 'source_context'.
+        """
         combined_query = f"{selected_text} {query}" if query else selected_text
         query_embedding = self._get_embedding(combined_query)
 

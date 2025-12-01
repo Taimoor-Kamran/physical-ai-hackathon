@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from backend.src.api.models import RAGQueryRequest, RAGQueryResponse
+from backend.src.api.models import QueryRequest, QueryResponse
 from backend.src.services.rag_service import RAGService
 from backend.src.utils.logging import get_logger
 
@@ -10,14 +10,14 @@ logger = get_logger(__name__)
 router = APIRouter()
 rag_service = RAGService()
 
-@router.post("/query", response_model=RAGQueryResponse)
-async def query_rag_endpoint(request: RAGQueryRequest):
+@router.post("/query", response_model=QueryResponse)
+async def query_rag_endpoint(request: QueryRequest):
     if not request.selected_text or len(request.selected_text) < 10:
         raise HTTPException(status_code=400, detail="Selected text is too short or missing.")
 
     try:
         result = rag_service.query_rag(request.selected_text, request.query)
-        return RAGQueryResponse(answer=result["answer"], source_context=result["source_context"])
+        return QueryResponse(answer=result["answer"], source_context=result["source_context"])
     except ValueError as e:
         logger.error(f"RAG service configuration error: {e}")
         raise HTTPException(status_code=500, detail="RAG service configuration error.")

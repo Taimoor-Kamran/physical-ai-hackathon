@@ -1,0 +1,76 @@
+---
+title: "Kinematics"
+---
+
+import ContentBlock from '@site/src/components/ContentBlock';
+
+<ContentBlock
+  title="Introduction to Kinematics"
+  theory={
+    <>
+      <p>Kinematics is the branch of classical mechanics that describes the motion of points, bodies (objects), and systems of bodies (groups of objects) without considering the forces that cause them to move. It is often referred to as the "geometry of motion." For robotics, kinematics is fundamental to understanding how a robot's joints and links move in space and how its end-effector (the part of the robot that interacts with its environment) can reach desired positions and orientations.</p>
+      <p>There are two main types of kinematics in robotics:</p>
+      <ul>
+        <li><strong>Forward Kinematics:</strong> Given the joint angles of a robot, determine the position and orientation of its end-effector in Cartesian space.</li>
+        <li><strong>Inverse Kinematics:</strong> Given the desired position and orientation of the end-effector, determine the necessary joint angles for the robot to reach that pose. This is generally more complex than forward kinematics as it can have multiple solutions, no solutions, or singular configurations.</li>
+      </ul>
+      <p>Understanding kinematics is crucial for robot control, path planning, and interaction with the environment.</p>
+    </>
+  }
+  code={
+    `# Example: Simple 2D Forward Kinematics for a 2-DOF Robotic Arm
+import numpy as np
+
+def forward_kinematics_2d(l1, l2, theta1_deg, theta2_deg):
+    theta1_rad = np.deg2rad(theta1_deg)
+    theta2_rad = np.deg2rad(theta2_deg)
+
+    # Position of end of link 1
+    x1 = l1 * np.cos(theta1_rad)
+    y1 = l1 * np.sin(theta1_rad)
+
+    # Position of end of link 2 (end-effector)
+    x = x1 + l2 * np.cos(theta1_rad + theta2_rad)
+    y = y1 + l2 * np.sin(theta1_rad + theta2_rad)
+
+    return x, y
+
+# Parameters
+length1 = 1.0 # length of link 1
+length2 = 0.8 # length of link 2
+angle1 = 30   # Joint 1 angle in degrees
+angle2 = 60   # Joint 2 angle in degrees
+
+# Calculate end-effector position
+ee_x, ee_y = forward_kinematics_2d(length1, length2, angle1, angle2)
+
+print(f"End-effector position: (x={ee_x:.2f}, y={ee_y:.2f})")
+`}
+  screenshot="/img/kinematics_gazebo_screenshot.png"
+  realRobotMapping={
+    <>
+      <p>On a real robot like a 6-DOF industrial arm, forward kinematics involves a series of homogeneous transformation matrices. Each matrix represents the transformation from one joint frame to the next. By multiplying these matrices sequentially from the base to the end-effector, we can obtain the final pose of the end-effector relative to the base frame.</p>
+      <p>Inverse kinematics on a real robot is often solved using numerical methods or geometric approaches for simpler manipulators. For complex robots, analytical solutions can be very difficult or impossible to derive, making iterative numerical solvers the preferred method. These solvers try to minimize the error between the desired end-effector pose and the current end-effector pose by adjusting joint angles.</p>
+    </>
+  }
+  labExercise={
+    <>
+      <h4>Objective:</h4>
+      <p>Implement and visualize the forward kinematics for a 3-DOF planar robotic arm in Python.</p>
+      <h4>Hardware Requirements:</h4>
+      <ul>
+        <li>Python 3.x installed</li>
+        <li><code>numpy</code> library</li>
+        <li><code>matplotlib</code> library (for visualization)</li>
+      </ul>
+      <h4>Instructions:</h4>
+      <ol>
+        <li>Write a Python function `forward_kinematics_3dof(l1, l2, l3, theta1_deg, theta2_deg, theta3_deg)` that takes three link lengths and three joint angles (in degrees) as input.</li>
+        <li>The function should return the (x, y) coordinates of the end-effector.</li>
+        <li>Visualize the robotic arm and its end-effector position using `matplotlib`.</li>
+        <li>Experiment with different joint angles and link lengths.</li>
+        <li><strong>Challenge:</strong> Research and implement a basic 2D inverse kinematics solver for the same 3-DOF arm (e.g., using a simple iterative approach or a geometric solution if applicable).</li>
+      </ol>
+    </>
+  }
+/>

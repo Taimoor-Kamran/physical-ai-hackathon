@@ -65,9 +65,9 @@ description: "Task list template for feature implementation"
 - [X] T012 [US1] Configure Docusaurus `docusaurus.config.js` with site metadata and theme (frontend/docusaurus.config.js)
 - [X] T013 [US1] Create Docusaurus `sidebars.js` for 13-week curriculum navigation (frontend/sidebars.js)
 - [X] T014 [US1] Create initial `index.md` or `_index.mdx` for the book's homepage (frontend/src/pages/index.mdx)
-- [ ] T015 [US1] Create placeholder Markdown/MDX files for all 13 weeks in `frontend/docs/` (frontend/docs/week1.mdx, frontend/docs/week2.mdx, ...)
-- [ ] T016 [P] [US1] Implement a basic Docusaurus component to display content with Theory, Code, Screenshot, Real robot mapping structure (frontend/src/components/ContentBlock.js)
-- [ ] T017 [US1] Update one chapter's content (e.g., `week1.mdx`) to use the new `ContentBlock` component and include a "Lab Exercise" section with hardware requirements (frontend/docs/week1.mdx)
+- [X] T015 [US1] Create placeholder Markdown/MDX files for all 14 chapters in `frontend/docs/` (frontend/docs/introduction.mdx, frontend/docs/kinematics.mdx, ...)
+- [X] T016 [P] [US1] Implement a basic Docusaurus component to display content with Theory, Code, Screenshot, Real robot mapping structure (frontend/src/components/ContentBlock.js)
+- [X] T017 [US1] Update one chapter's content (e.g., `kinematics.mdx`) to use the new `ContentBlock` component and include a "Lab Exercise" section with hardware requirements (frontend/docs/kinematics.mdx)
 - [X] T018 [US1] Configure GitHub Actions for Docusaurus deployment to GitHub Pages (root/.github/workflows/deploy-docs.yml)
 - [X] T019 [US1] Verify Docusaurus deployment to GitHub Pages works correctly (GitHub Pages URL)
 
@@ -84,14 +84,14 @@ description: "Task list template for feature implementation"
 ### Implementation for User Story 2
 
 - [X] T020 [US2] Define FastAPI model for `/query` request (selected_text, query) in `backend/src/api/models.py` (backend/src/api/models.py)
-- [ ] T021 [US2] Define FastAPI model for `/query` response (answer, source_context) in `backend/src/api/models.py` (backend/src/api/models.py)
+- [X] T021 [US2] Define FastAPI model for `/query` response (answer, source_context) in `backend/src/api/models.py` (backend/src/api/models.py)
 - [X] T022 [P] [US2] Implement Qdrant client initialization and connection in `backend/src/data/qdrant_client.py` (backend/src/data/qdrant_client.py)
 - [X] T023 [P] [US2] Implement Postgres connection and basic content retrieval in `backend/src/data/postgres_client.py` (backend/src/data/postgres_client.py)
-- [ ] T024 [P] [US2] Implement OpenAI Agents SDK / ChatKit integration for RAG processing in `backend/src/services/rag_service.py` (backend/src/services/rag_service.py)
-- [ ] T025 [US2] Implement `/query` FastAPI endpoint that uses `rag_service` to process selected text (backend/src/api/routes.py)
-- [ ] T026 [P] [US2] Create a Docusaurus client-side component to allow text selection and display chatbot UI (frontend/src/components/RAGChatbot.js)
-- [ ] T027 [US2] Integrate `RAGChatbot` component into Docusaurus content pages (frontend/src/theme/DocItem/Content/index.js)
-- [ ] T028 [US2] Implement client-side logic to send selected text to `/query` API endpoint and display response (frontend/src/components/RAGChatbot.js)
+- [X] T024 [P] [US2] Implement OpenAI Agents SDK / ChatKit integration for RAG processing in `backend/src/services/rag_service.py` (backend/src/services/rag_service.py)
+- [X] T025 [US2] Implement `/query` FastAPI endpoint that uses `rag_service` to process selected text (backend/src/api/routes.py)
+- [X] T026 [P] [US2] Create a Docusaurus client-side component to allow text selection and display chatbot UI (frontend/src/components/RAGChatbot.js)
+- [X] T027 [US2] Integrate `RAGChatbot` component into Docusaurus content pages (frontend/src/theme/DocItem/Content/index.js)
+- [X] T028 [US2] Implement client-side logic to send selected text to `/query` API endpoint and display response (frontend/src/components/RAGChatbot.js)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -107,7 +107,7 @@ description: "Task list template for feature implementation"
 
 - [ ] T029 [US3] Create or verify `LICENSE.md` file with MIT License in repository root (root/LICENSE.md)
 - [ ] T030 [US3] Ensure all generated code includes proper Claude authorship comments/metadata where applicable (all code files)
-- [ ] T031 [US3] Verify GitHub repository settings for public visibility (GitHub Repository Settings)
+- [X] T031 [US3] Verify GitHub repository settings for public visibility (GitHub Repository Settings)
 
 **Checkpoint**: All user stories should now be independently functional
 
