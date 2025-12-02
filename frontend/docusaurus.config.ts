@@ -12,7 +12,7 @@ const config: Config = {
 
   tagline: 'Learn about Physical AI and Humanoid Robotics with hands-on labs',
 
-  favicon: 'img/favicon.ico',
+  favicon: 'img/favicon.svg',
 
 
 
@@ -63,11 +63,8 @@ const config: Config = {
         },
 
         blog: {
-
           showReadingTime: true,
-
           editUrl: 'https://github.com/Taimoor-Kamran/physical-ai-hackathon/edit/main/frontend/',
-
         },
 
         theme: {

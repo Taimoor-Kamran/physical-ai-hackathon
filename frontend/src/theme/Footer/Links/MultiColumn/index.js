@@ -61,26 +61,6 @@ export default function FooterLinksMultiColumn() {
         { label: 'Panaverse Website', href: 'https://www.panaverse.co/' },
       ],
     },
-    {
-      title: 'Social',
-      items: [
-        {
-          html: `
-            <div class="footer__social-icons">
-              <a href="https://github.com/panaverse" target="_blank" rel="noopener noreferrer" class="footer__social-link">
-                <Icon icon="github" size={24} />
-              </a>
-              <a href="https://twitter.com/Panaverse_Edu" target="_blank" rel="noopener noreferrer" class="footer__social-link">
-                <Icon icon="twitter" size={24} />
-              </a>
-              <a href="https://discord.gg/panaverse" target="_blank" rel="noopener noreferrer" class="footer__social-link">
-                <Icon icon="message-circle" size={24} />
-              </a>
-            </div>
-          `,
-        },
-      ],
-    },
   ];
 
   return (
