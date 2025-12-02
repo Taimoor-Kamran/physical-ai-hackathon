@@ -1,0 +1,55 @@
+.toggle {
+  width: 2rem;
+  height: 2rem;
+  position: relative; /* For absolute positioning of icons */
+}
+
+.toggleButton {
+  -webkit-tap-highlight-color: transparent;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  transition: background var(--ifm-transition-fast);
+}
+
+.toggleButton:hover {
+  background: var(--ifm-color-emphasis-200);
+}
+
+/* Custom styles for sun/moon icons */
+.iconWrapper {
+  position: relative;
+  width: 20px; /* Adjust as needed */
+  height: 20px; /* Adjust as needed */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconLight,
+.iconDark {
+  position: absolute;
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+[data-theme='dark'] .iconLight {
+  opacity: 0;
+  transform: rotate(-90deg);
+}
+
+[data-theme='light'] .iconDark {
+  opacity: 0;
+  transform: rotate(90deg);
+}
+
+/* Hide Docusaurus default icons */
+.toggleIcon {
+  display: none !important;
+}
+
+.toggleButtonDisabled {
+  cursor: not-allowed;
+}
