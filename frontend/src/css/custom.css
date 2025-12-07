@@ -39,17 +39,6 @@ h1, h2, h3, h4, h5, h6 {
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
 
-.navbar {
-  backdrop-filter: blur(10px);
-}
-
-[data-theme='light'] .navbar {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-[data-theme='dark'] .navbar {
-  background-color: rgba(0, 0, 0, 0.3);
-}
 
 .card {
   border-radius: 12px;
@@ -177,3 +166,33 @@ h1, h2, h3, h4, h5, h6 {
   to { opacity: 0.9; transform: scale(1.05); }
 }
 
+.blog-wrapper { background: linear-gradient(135deg, #0f0f23, #1a1a2e); min-height: 100vh; }
+.blog-title { font-size: 3rem; text-align: center; padding: 3rem 0; color: #fff; text-shadow: 0 0 20px rgba(139,92,246,0.8); }
+.blog-subtitle { text-align: center; color: #a78bfa; margin-bottom: 3rem; }
+.blog-card { background: rgba(255,255,255,0.1); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 1.5rem; transition: transform 0.3s; }
+.blog-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(139,92,246,0.3); }
+
+
+/* LIGHT MODE */
+html[data-theme='light'] .navbar { background: #ffffff !important; }
+html[data-theme='light'] .blog-wrapper { background: #f8f9fa !important; }
+html[data-theme='light'] .blog-wrapper * { color: #1e293b !important; }
+html[data-theme='light'] .blog-card { background: #ffffff !important; border: 1px solid #e2e8f0; }
+
+/* DARK MODE */
+html[data-theme='dark'] .navbar { background: #1a1a2e !important; }
+html[data-theme='dark'] .blog-wrapper { background: #0f0f23 !important; }
+html[data-theme='dark'] .blog-wrapper * { color: #e0e7ff !important; }
+
+/* === FINAL FORCE LIGHT MODE BLOG TEXT === */
+html[data-theme='light'] [class*="blog"],
+html[data-theme='light'] .container,
+html[data-theme='light'] .main-wrapper,
+html[data-theme='light'] .blog-post,
+html[data-theme='light'] .markdown,
+html[data-theme='light'] * {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+html[data-theme='light'] .navbar { background: #ffffff !important; }
+html[data-theme='light'] .blog-wrapper { background: #f9fafb !important; }

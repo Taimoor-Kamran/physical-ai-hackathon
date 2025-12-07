@@ -1,0 +1,14 @@
+.personalizeButton {
+  background-color: var(--ifm-color-primary);
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: var(--ifm-button-border-radius);
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.personalizeButton:hover {
+  background-color: var(--ifm-color-primary-dark);
+}

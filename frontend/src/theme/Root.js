@@ -10,7 +10,7 @@ export default function Root({ children }) {
   return (
     <>
       {isBlogPage && <BlogHeroHeader />}
-      <div className={clsx({'blog-content-wrapper': isBlogPage})}>
+      <div className={clsx({'blog-wrapper': isBlogPage})}>
         {children}
       </div>
     </>

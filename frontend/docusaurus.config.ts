@@ -76,7 +76,6 @@ const config: Config = {
       } satisfies Preset.Options,
 
     ],
-
   ],
 
 
@@ -95,13 +94,6 @@ const config: Config = {
 
       title: 'Physical AI & Humanoid Robotics',
 
-      logo: {
-
-        alt: 'Logo',
-
-        src: 'img/logo.svg',
-
-      },
 
       items: [
 
