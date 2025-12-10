@@ -15,29 +15,25 @@ function LogoImage({
   // };
 
   // Directly use img tag for Panaversity logo
-  return ( <
-    img className = {clsx('footer__logo', styles.footerLogo, logo.className)}
-    alt = {logo.alt || 'Panaverse DAO Logo'}
-    src = {'/physical-ai-hackathon/img/panaversity-logo.png'}
-    width = {logo.width || 160}
-    height = {logo.height || 51}
+  return (
+    <img className={clsx('footer__logo', styles.footerLogo, logo.className)}
+    alt={logo.alt || 'Panaverse DAO Logo'}
+    src={'/physical-ai-hackathon/img/panaversity-logo.png'}
+    width={logo.width || 160}
+    height={logo.height || 51}
     />
   );
 }
 export default function FooterLogo({
   logo
 }) {
-  return logo.href ? ( <
-    Link href = {logo.href}
-    className = {styles.footerLogoLink}
-    target = {logo.target} >
-    <
-    LogoImage logo = {logo}
-    />
-    <
-    /Link>
-  ) : ( <
-    LogoImage logo = {logo}
-    />
+  return logo.href ? (
+    <Link href={logo.href}
+    className={styles.footerLogoLink}
+    target={logo.target}>
+    <LogoImage logo={logo} />
+    </Link>
+  ) : (
+    <LogoImage logo={logo} />
   );
 }

@@ -57,12 +57,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .hero-banner {
-  background: linear-gradient(to bottom, #0a0a1f, #1a1a3d);
+  background: linear-gradient(to bottom, #080d26, #1a1a2e); /* Consistent with footer background (#1a1a2e) */
   color: white;
-  padding: 4rem 0;
-  text-align: center;
-  position: relative; /* Needed for absolute positioning of pseudo-element */
-  overflow: hidden;   /* Hide overflowing grid */
+  padding: 3rem 0; /* Reduced height for better balance */
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .hero-banner::before {
@@ -81,6 +83,8 @@ h1, h2, h3, h4, h5, h6 {
 .hero-banner > div {
   position: relative; /* Ensure container content is above the grid */
   z-index: 1;
+  text-align: center;
+  width: 100%;
 }
 
 @keyframes rotateGrid {
@@ -97,11 +101,13 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: bold;
   color: white;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+  text-align: center;
 }
 
 .hero-banner p {
   font-size: 1.5rem;
   margin-top: 1rem;
+  text-align: center;
 }
 
 .hero-text-center {
@@ -184,15 +190,30 @@ html[data-theme='dark'] .navbar { background: #1a1a2e !important; }
 html[data-theme='dark'] .blog-wrapper { background: #0f0f23 !important; }
 html[data-theme='dark'] .blog-wrapper * { color: #e0e7ff !important; }
 
+/* Footer text centering */
+.footer-text-center {
+  text-align: center;
+  margin: 0.5rem 0;
+  font-weight: 600;
+}
+
 /* === FINAL FORCE LIGHT MODE BLOG TEXT === */
 html[data-theme='light'] [class*="blog"],
-html[data-theme='light'] .container,
 html[data-theme='light'] .main-wrapper,
 html[data-theme='light'] .blog-post,
 html[data-theme='light'] .markdown,
 html[data-theme='light'] * {
   color: #000000 !important;
   background-color: #ffffff !important;
+}
+
+/* Ensure hero banner container has no white background */
+html[data-theme='light'] .hero-banner .container {
+  background: transparent !important;
+}
+
+html[data-theme='dark'] .hero-banner .container {
+  background: transparent !important;
 }
 html[data-theme='light'] .navbar { background: #ffffff !important; }
 html[data-theme='light'] .blog-wrapper { background: #f9fafb !important; }

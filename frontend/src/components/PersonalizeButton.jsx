@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './PersonalizeButton.module.css';
-import usePersonalization from '../../hooks/usePersonalization';
+import usePersonalization from '../hooks/usePersonalization';
 
 function PersonalizeButton() {
   const [isPersonalized, togglePersonalization] = usePersonalization();
