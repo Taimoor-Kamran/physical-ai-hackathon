@@ -3,15 +3,49 @@
     bottom: 20px;
     right: 20px;
     width: 350px;
+    height: 500px;
     max-height: 80vh;
-    background-color: var(--docusaurus-sidebar-background-color);
+    background-color: #ffffff; /* Light mode background */
     border: 1px solid var(--ifm-toc-border-color);
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     display: flex;
     flex-direction: column;
     z-index: 1000;
     font-size: 0.9em;
+    overflow: hidden;
+  }
+
+  /* Dark mode support */
+  [data-theme='dark'] .chatbotContainer {
+    background-color: #0f172a; /* Dark mode background */
+    color: #f3f4f6; /* Light text for dark background */
+  }
+
+  /* Light mode support */
+  [data-theme='light'] .chatbotContainer {
+    background-color: #ffffff; /* Light mode background */
+    color: #1f2937; /* Dark text for light background */
+  }
+
+  .chatbotClosedButton {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--ifm-color-primary);
+    color: white;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .chatbotHeader {
@@ -23,6 +57,7 @@
     color: white;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
+    border-bottom: 1px solid var(--ifm-toc-border-color);
   }
 
   .chatbotHeader h3 {
@@ -43,6 +78,45 @@
     padding: 15px;
     overflow-y: auto;
     flex-grow: 1;
+    background-color: inherit; /* Inherits from container for consistency */
+  }
+
+  .chatbotContent p {
+    color: inherit; /* Ensures text color matches theme */
+    line-height: 1.5;
+  }
+
+  .answerSection {
+    margin-top: 20px;
+    border-top: 1px solid var(--ifm-toc-border-color);
+    padding-top: 15px;
+  }
+
+  .answerSection h4 {
+    margin-top: 0;
+    color: inherit; /* Use theme-appropriate color */
+  }
+
+  .sourceContext {
+    margin-top: 10px;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+
+  .sourceContext h5 {
+    margin-bottom: 5px;
+    color: inherit; /* Use theme-appropriate color */
+  }
+
+  .sourceContext ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin: 5px 0;
+  }
+
+  .sourceContext li {
+    margin-bottom: 5px;
+    color: inherit; /* Use theme-appropriate color */
   }
 
   .queryInput {

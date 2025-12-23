@@ -11,16 +11,15 @@ const RAGChatbot = () => {
   const [sourceContext, setSourceContext] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [isVisible, setIsVisible] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true); // Start minimized as closed
+  const [isChatOpen, setIsChatOpen] = useState(false); // Track if chat is open
 
   const handleTextSelection = () => {
     const text = window.getSelection().toString().trim();
     if (text.length > 10) {
       setSelectedText(text);
-      setIsVisible(true);
-    } else {
-      setIsVisible(false);
-      setSelectedText('');
+      setIsMinimized(false); // Open the chatbot when text is selected
+      setIsChatOpen(true); // Set as open when text is selected
     }
   };
 
@@ -44,17 +43,25 @@ const RAGChatbot = () => {
     setSourceContext([]);
 
     try {
-      const response = await fetch('http://localhost:8000/query', {
+      const response = await fetch('http://localhost:8000/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ selected_text: selectedText, query }),
+        body: JSON.stringify({ query: query, context: selectedText }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to fetch answer from RAG service');
+        // Check if response is JSON or HTML error page
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Failed to fetch answer from RAG service');
+        } else {
+          // If it's not JSON, it might be an HTML error page
+          const errorText = await response.text();
+          throw new Error(`Backend error: ${response.status} - ${errorText.substring(0, 200)}...`);
+        }
       }
 
       const data = await response.json();
@@ -68,55 +75,73 @@ const RAGChatbot = () => {
   };
 
   const handleClose = () => {
-    setIsVisible(false);
-    setSelectedText('');
+    setIsMinimized(true); // Minimize to closed state
+    setIsChatOpen(false); // Set as closed
+    // Don't clear selected text so it persists if user wants to ask more questions
     setQuery('');
     setAnswer('');
     setSourceContext([]);
     setError('');
   };
 
-  if (!isVisible) return null;
+  const handleOpenChat = () => {
+    setIsMinimized(false);
+    setIsChatOpen(true);
+  };
 
   return (
-    <div className={styles.chatbotContainer}>
-      <div className={styles.chatbotHeader}>
-        <h3>RAG Chatbot</h3>
-        <button onClick={handleClose} className={styles.closeButton}>X</button>
-      </div>
-      <div className={styles.chatbotContent}>
-        <p><strong>Selected Text:</strong> {selectedText.substring(0, 100)}...</p>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Ask a follow-up question (optional)"
-            className={styles.queryInput}
-          />
-          <button type="submit" disabled={loading} className={styles.submitButton}>
-            {loading ? 'Thinking...' : 'Get Answer'}
-          </button>
-        </form>
-        {error && <p className={styles.errorMessage}>Error: {error}</p>}
-        {answer && (
-          <div className={styles.answerSection}>
-            <h4>Answer:</h4>
-            <p>{answer}</p>
-            {sourceContext.length > 0 && (
-              <div className={styles.sourceContext}>
-                <h5>Source Context:</h5>
-                <ul>
-                  {sourceContext.map((source, index) => (
-                    <li key={index}>{source}</li>
-                  ))}
-                </ul>
+    <>
+      {isMinimized && !isChatOpen && (
+        <button
+          onClick={handleOpenChat}
+          className={styles.chatbotClosedButton}
+          aria-label="Open chat"
+        >
+          CHAT
+        </button>
+      )}
+
+      {!isMinimized && isChatOpen && (
+        <div className={styles.chatbotContainer}>
+          <div className={styles.chatbotHeader}>
+            <h3>RAG Chatbot</h3>
+            <button onClick={handleClose} className={styles.closeButton}>X</button>
+          </div>
+          <div className={styles.chatbotContent}>
+            <p><strong>Selected Text:</strong> {selectedText.substring(0, 100)}...</p>
+            <form onSubmit={handleSubmit}>
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Ask a follow-up question (optional)"
+                className={styles.queryInput}
+              />
+              <button type="submit" disabled={loading} className={styles.submitButton}>
+                {loading ? 'Thinking...' : 'Get Answer'}
+              </button>
+            </form>
+            {error && <p className={styles.errorMessage}>Error: {error}</p>}
+            {answer && (
+              <div className={styles.answerSection}>
+                <h4>Answer:</h4>
+                <p>{answer}</p>
+                {sourceContext.length > 0 && (
+                  <div className={styles.sourceContext}>
+                    <h5>Source Context:</h5>
+                    <ul>
+                      {sourceContext.map((source, index) => (
+                        <li key={index}>{typeof source === 'string' ? source : source.title || source.source_path || JSON.stringify(source)}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      )}
+    </>
   );
 };
 

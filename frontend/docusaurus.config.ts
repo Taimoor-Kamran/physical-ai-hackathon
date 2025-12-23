@@ -79,7 +79,7 @@ const config: Config = {
 
   ],
 
-
+  themes: ['@docusaurus/theme-live-codeblock'],
 
   themeConfig: {
 
@@ -95,13 +95,6 @@ const config: Config = {
 
       title: 'Physical AI & Humanoid Robotics',
 
-      logo: {
-
-        alt: 'Logo',
-
-        src: 'img/logo.svg',
-
-      },
 
       items: [
 

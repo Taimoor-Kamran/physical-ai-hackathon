@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()  # Load environment variables from .env file
+
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams
 
@@ -6,6 +9,7 @@ QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", 6333))
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY", None)
 QDRANT_COLLECTION_NAME = os.getenv("QDRANT_COLLECTION_NAME", "book_content")
+COLLECTION_NAME = QDRANT_COLLECTION_NAME
 
 def get_qdrant_client():
     client = QdrantClient(
