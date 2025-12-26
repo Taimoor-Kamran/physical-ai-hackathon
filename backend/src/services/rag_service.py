@@ -135,15 +135,24 @@ class RAGService:
             try:
                 query_embedding = self._get_embedding(combined_query)
 
-                search_result = self._qdrant_client.search(
+                search_result = self._qdrant_client.query_points(
                     collection_name=COLLECTION_NAME,
-                    query_vector=query_embedding,
+                    query=query_embedding,
                     limit=3, # Retrieve top 3 relevant chunks
                     with_payload=True,
                 )
 
-                # Check if any results were found - Qdrant search returns a list of ScoredPoint objects
-                if not search_result or len(search_result) == 0:
+                # Check if any results were found - query_points returns a QueryResponse object
+                # Convert to list if needed
+                hits = search_result if hasattr(search_result, '__iter__') else []
+                if hasattr(search_result, 'points'):
+                    hits = search_result.points
+                elif hasattr(search_result, '__len__') and len(search_result) > 0:
+                    hits = search_result
+                else:
+                    hits = []
+
+                if not hits or len(hits) == 0:
                     logger.warning("No vectors found in Qdrant collection. Please run the embedding pipeline to populate the collection.")
                     return {
                         "answer": "No relevant content found in the book. Please run the embedding pipeline to populate the vector database with book content.",
@@ -152,9 +161,36 @@ class RAGService:
 
                 context = []
                 source_context = []
-                for hit in search_result:
-                    context.append(hit.payload["text"])
-                    source_context.append(hit.payload["metadata"])
+                for hit in hits:
+                    # Handle different response formats
+                    if hasattr(hit, 'payload'):
+                        payload = hit.payload
+                    elif hasattr(hit, 'dict') and callable(getattr(hit, 'dict')):
+                        payload = hit.dict().get('payload', {})
+                    else:
+                        payload = getattr(hit, 'payload', {})
+
+                    if isinstance(payload, dict):
+                        text = payload.get("text", "")
+                        metadata = payload.get("metadata", {})
+                    else:
+                        # If payload is not a dict, try to access as object attributes
+                        text = getattr(payload, 'text', '') if hasattr(payload, 'text') else str(payload)
+                        metadata = getattr(payload, 'metadata', {}) if hasattr(payload, 'metadata') else {}
+
+                    context.append(text)
+                    # Convert metadata to a string representation for the API
+                    if isinstance(metadata, dict) and metadata:
+                        # Create a string representation of the metadata
+                        metadata_str = str(metadata)
+                    elif isinstance(metadata, dict):
+                        # If metadata is empty, use a default string
+                        metadata_str = "document"
+                    else:
+                        # If metadata is not a dict, convert to string
+                        metadata_str = str(metadata)
+
+                    source_context.append(metadata_str)
 
                 context_str = "\n\n".join(context)
                 full_prompt = f"""Based on the following context from the book, answer the question.\n\nContext:\n{context_str}\n\nQuestion: {combined_query}\nAnswer:"""

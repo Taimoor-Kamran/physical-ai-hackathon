@@ -2,6 +2,8 @@ import os
 import re
 from pathlib import Path
 from typing import List, Dict, Tuple
+from dotenv import load_dotenv
+load_dotenv()  # Load environment variables from .env file
 from src.utils.logging import get_logger
 from src.data.qdrant_client import get_qdrant_client, COLLECTION_NAME
 from qdrant_client.http.models import PointStruct, VectorParams, Distance
